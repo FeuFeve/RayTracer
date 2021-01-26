@@ -1,0 +1,102 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.cpp
+./png.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
+stdlib.h
+-
+stdexcept
+-
+limits.h
+-
+string.h
+-
+stdio.h
+-
+errno.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngdec.cpp
+./pngdec.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngdec.h
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngdec.h
+./png.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
+./zdec.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zdec.h
+stdio.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngenc.cpp
+pngenc.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngenc.h
+stdlib.h
+-
+stdio.h
+-
+time.h
+-
+string.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngenc.h
+./png.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
+./zenc.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zenc.h
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zdec.cpp
+./zdec.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zdec.h
+stdlib.h
+-
+stdio.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zdec.h
+./zss.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zss.h
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zenc.cpp
+./zenc.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zenc.h
+stdlib.h
+-
+limits.h
+-
+string.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zenc.h
+./zss.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zss.h
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zss.cpp
+stdlib.h
+-
+./zss.h
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zss.h
+string.h
+-
+limits.h
+-
+stdio.h
+-
+
+C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/zss.h
+
