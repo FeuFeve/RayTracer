@@ -25,6 +25,8 @@ point4 cameraPosition;
 //Recursion depth for raytracer
 int maxDepth = 3;
 
+void initGL();
+
 namespace GLState {
   int window_width, window_height;
 
@@ -74,7 +76,7 @@ private:
   unsigned int width;
   unsigned int height;
   int channels;
-  
+
 public:
   rayTraceReceptor(const unsigned char *use_buffer,
                    unsigned int width,
@@ -136,12 +138,12 @@ bool write_image(const char* filename, const unsigned char *Src,
 /* -------- Given OpenGL matrices find ray in world coordinates of ---------- */
 /* -------- window position x,y --------------------------------------------- */
 std::vector < vec4 > findRay(GLdouble x, GLdouble y){
-  
+
   y = GLState::window_height-y;
-  
+
   int viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  
+
   GLdouble modelViewMatrix[16];
   GLdouble projectionMatrix[16];
   for(unsigned int i=0; i < 4; i++){
@@ -150,30 +152,30 @@ std::vector < vec4 > findRay(GLdouble x, GLdouble y){
       projectionMatrix[j*4+i] =  GLState::projection[i][j];
     }
   }
-  
-  
+
+
   GLdouble nearPlaneLocation[3];
   _gluUnProject(x, y, 0.0, modelViewMatrix, projectionMatrix,
                 viewport, &nearPlaneLocation[0], &nearPlaneLocation[1],
                 &nearPlaneLocation[2]);
-  
+
   GLdouble farPlaneLocation[3];
   _gluUnProject(x, y, 1.0, modelViewMatrix, projectionMatrix,
                 viewport, &farPlaneLocation[0], &farPlaneLocation[1],
                 &farPlaneLocation[2]);
-  
-  
+
+
   vec4 ray_origin = vec4(nearPlaneLocation[0], nearPlaneLocation[1], nearPlaneLocation[2], 1.0);
   vec3 temp = vec3(farPlaneLocation[0]-nearPlaneLocation[0],
                    farPlaneLocation[1]-nearPlaneLocation[1],
                    farPlaneLocation[2]-nearPlaneLocation[2]);
   temp = normalize(temp);
   vec4 ray_dir = vec4(temp.x, temp.y, temp.z, 0.0);
-  
+
   std::vector < vec4 > result(2);
   result[0] = ray_origin;
   result[1] = ray_dir;
-  
+
   return result;
 }
 
@@ -187,14 +189,14 @@ bool intersectionSort(Object::IntersectionValues i, Object::IntersectionValues j
 /* ---------  Some debugging code: cast Ray = p0 + t*dir  ------------------- */
 /* ---------  and print out what it hits =                ------------------- */
 void castRayDebug(vec4 p0, vec4 dir){
-  
+
   std::vector < Object::IntersectionValues > intersections;
-  
+
   for(unsigned int i=0; i < sceneObjects.size(); i++){
     intersections.push_back(sceneObjects[i]->intersect(p0, dir));
     intersections[intersections.size()-1].ID_ = i;
   }
-  
+
   for(unsigned int i=0; i < intersections.size(); i++){
     if(intersections[i].t != std::numeric_limits< double >::infinity()){
       std::cout << "Hit " << intersections[i].name << " " << intersections[i].ID_ << "\n";
@@ -205,15 +207,15 @@ void castRayDebug(vec4 p0, vec4 dir){
       std::cout << "L: " << L << "\n";
     }
   }
-  
+
 }
 
 /* -------------------------------------------------------------------------- */
 bool shadowFeeler(vec4 p0, Object *object){
   bool inShadow = false;
-  
+
   //TODO: Shadow code here
-  
+
   return inShadow;
 }
 
@@ -223,25 +225,25 @@ bool shadowFeeler(vec4 p0, Object *object){
 /* ----------  depth                                                --------- */
 vec4 castRay(vec4 p0, vec4 E, Object *lastHitObject, int depth){
   vec4 color = vec4(0.0,0.0,0.0,0.0);
-  
+
   if(depth > maxDepth){ return color; }
-  
+
   //TODO: Raytracing code here
-  
+
   return color;
-  
+
 }
 
 /* -------------------------------------------------------------------------- */
 /* ------------  Ray trace our scene.  Output color to image and    --------- */
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace(){
-  
+
   unsigned char *buffer = new unsigned char[GLState::window_width*GLState::window_height*4];
-  
+
   for(unsigned int i=0; i < GLState::window_width; i++){
     for(unsigned int j=0; j < GLState::window_height; j++){
-      
+
       int idx = j*GLState::window_width+i;
       std::vector < vec4 > ray_o_dir = findRay(i,j);
       vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z,0.0), NULL, 0);
@@ -251,9 +253,9 @@ void rayTrace(){
       buffer[4*idx+3] = color.w*255;
     }
   }
-  
+
   write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);
-  
+
   delete[] buffer;
 }
 
@@ -270,9 +272,9 @@ void initCornellBox(){
   cameraPosition = point4( 0.0, 0.0, 6.0, 1.0 );
   lightPosition = point4( 0.0, 1.5, 0.0, 1.0 );
   lightColor = color4( 1.0, 1.0, 1.0, 1.0);
-  
+
   sceneObjects.clear();
-  
+
   { //Back Wall
     sceneObjects.push_back(new Square("Back Wall", Translate(0.0, 0.0, -2.0)*Scale(2.0,2.0,1.0)));
     Object::ShadingValues _shadingValues;
@@ -286,7 +288,7 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   { //Left Wall
     sceneObjects.push_back(new Square("Left Wall", RotateY(90)*Translate(0.0, 0.0, -2.0)*Scale(2.0,2.0,1.0)));
     Object::ShadingValues _shadingValues;
@@ -300,7 +302,7 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   { //Right Wall
     sceneObjects.push_back(new Square("Right Wall", RotateY(-90)*Translate(0.0, 0.0, -2.0)*Scale(2.0, 2.0, 1.0 )));
     Object::ShadingValues _shadingValues;
@@ -314,7 +316,7 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   { //Floor
     sceneObjects.push_back(new Square("Floor", RotateX(-90)*Translate(0.0, 0.0, -2.0)*Scale(2.0, 2.0, 1.0)));
     Object::ShadingValues _shadingValues;
@@ -328,7 +330,7 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   { //Ceiling
     sceneObjects.push_back(new Square("Ceiling", RotateX(90)*Translate(0.0, 0.0, -2.0)*Scale(2.0, 2.0, 1.0)));
     Object::ShadingValues _shadingValues;
@@ -342,7 +344,7 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   { //Front Wall
     sceneObjects.push_back(new Square("Front Wall",RotateY(180)*Translate(0.0, 0.0, -2.0)*Scale(2.0, 2.0, 1.0)));
     Object::ShadingValues _shadingValues;
@@ -356,8 +358,8 @@ void initCornellBox(){
     sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
     sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
-  
+
+
   {
   sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5),0.75));
   Object::ShadingValues _shadingValues;
@@ -371,7 +373,7 @@ void initCornellBox(){
   sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
   sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
   {
   sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -1.25, 0.5),0.75));
   Object::ShadingValues _shadingValues;
@@ -394,9 +396,9 @@ void initUnitSphere(){
   cameraPosition = point4( 0.0, 0.0, 3.0, 1.0 );
   lightPosition = point4( 0.0, 0.0, 4.0, 1.0 );
   lightColor = color4( 1.0, 1.0, 1.0, 1.0);
-  
+
   sceneObjects.clear();
-  
+
   {
   sceneObjects.push_back(new Sphere("Diffuse sphere"));
   Object::ShadingValues _shadingValues;
@@ -410,7 +412,7 @@ void initUnitSphere(){
   sceneObjects[sceneObjects.size()-1]->setShadingValues(_shadingValues);
   sceneObjects[sceneObjects.size()-1]->setModelView(mat4());
   }
-  
+
 }
 
 /* -------------------------------------------------------------------------- */
@@ -457,6 +459,8 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
     scene = _BOX;
     initCornellBox();
   }
+
+  initGL();
   if (key == GLFW_KEY_R && action == GLFW_PRESS)
     rayTrace();
 }
