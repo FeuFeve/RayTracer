@@ -197,4 +197,10 @@ common.h
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/common.h
 SourcePath.h
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/SourcePath.h
+io.h
+-
+cstdlib
+-
+cstdio
+-
 
