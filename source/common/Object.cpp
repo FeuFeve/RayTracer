@@ -12,7 +12,15 @@
 /* -------------------------------------------------------------------------- */
 Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
+
     //TODO: Ray-sphere setup
+    result.t = raySphereIntersection(p0, V);
+
+    // r(t) = o + td
+    // P = r(t), o = p0, d = V
+    result.P = p0 + (result.t * V);
+    result.N = p0 - center;
+
     return result;
 }
 
@@ -20,30 +28,27 @@ Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
 /* ------ Ray = p0 + t*V  sphere at origin center and radius radius    : Find t ------- */
 double Sphere::raySphereIntersection(vec4 p0, vec4 V) {
     double t = std::numeric_limits<double>::infinity();
-    //TODO: Ray-sphere intersection;
+
+    //TODO: Ray-sphere intersection
 
     // t²d.d + 2td.(o-center) + ||o-center||²-r² = 0
-    // center = this->center;
-    // r = this->radius;
-    // o = p0
-    // d = V
-    // a = d.d
-    // b = 2d.(o-center)
-    // c = ||o-center||²-r²
+    vec3 rayOrigin = vec3(p0.x, p0.y, p0.z);
+    vec3 rayDirection = vec3(V.x, V.y, V.z);
+    vec3 centerToRayOrigin = rayOrigin - center;
+    vec3 normalizedCenterToRayOrigin = normalize(centerToRayOrigin);
 
-    vec3 oMinusC = vec3(p0.x - this->center.x, p0.y - this->center.y, p0.z - this->center.z);
+    double a = dot(rayDirection, rayDirection);
+    double b = 2 * dot(rayDirection, centerToRayOrigin);
+    double c = dot(normalizedCenterToRayOrigin, normalizedCenterToRayOrigin) - pow(radius, 2);
+    double delta = pow(b, 2) - (4*a*c);
 
-    double a = (V.x * V.x) + (V.y * V.y) + (V.z * V.z) + (V.w * V.w);
-    double b = 2 * (V.x * oMinusC.x + V.y * oMinusC.y + V.z * oMinusC.z);
-    double c = pow(sqrt(pow(oMinusC.x, 2) + pow(oMinusC.y, 2) + pow(oMinusC.z, 2)), 2) - pow(this->radius, 2);
-
-    double delta = pow(b, 2) - 4 * a * c;
     // if (delta < 0) // No intersection, let t be infinity() and return it
+
     if (delta == 0) // Only 1 intersection
-        t = -b / 2*a;
+        t = (-b) / (2*a);
     else if (delta > 0) { // Two intersections, keep the positive minimum between s1 and s2
-        double s1 = (-b - sqrt(delta)) / 2*a;
-        double s2 = (-b + sqrt(delta)) / 2*a;
+        double s1 = (-b - sqrt(delta)) / (2*a);
+        double s2 = (-b + sqrt(delta)) / (2*a);
         if (s1 < 0)
             t = s2;
         else
