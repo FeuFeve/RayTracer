@@ -235,9 +235,20 @@ bool shadowFeeler(vec4 p0, Object *object) {
 vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
 
-    if (depth > maxDepth) { return color; }
+    if (depth > maxDepth) return color;
 
     //TODO: Raytracing code here
+    std::vector<Object::IntersectionValues> intersectionValues;
+    for (int i = 0; i < sceneObjects.size(); i++) {
+        intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir)); // TODO Object.cpp Sphere::intersect
+        intersectionValues[intersectionValues.size()-1].ID_ = i;
+    }
+
+    for (auto & intersectionValue : intersectionValues) {
+        if (intersectionValue.t != std::numeric_limits<double>::infinity()) {
+            color = sceneObjects[intersectionValue.ID_]->shadingValues.color;
+        }
+    }
 
     return color;
 
