@@ -81,7 +81,7 @@ public:
     virtual IntersectionValues intersect(vec4 p0, vec4 V);
     
 private:
-    double raySphereIntersection(vec4 p0, vec4 V);
+    double raySphereIntersection(const vec4& p0, const vec4& V);
     vec3 center;
     double radius;
 };
@@ -124,7 +124,7 @@ public:
     virtual IntersectionValues intersect(vec4 p0, vec4 V);
 
 private:
-    double raySquareIntersection(vec4 p0, vec4 V);
+    double raySquareIntersection(const vec4& p0, const vec4& V);
     vec4 point;
     vec3 normal;
 };

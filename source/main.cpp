@@ -423,7 +423,7 @@ void initUnitSphere() {
     {
         sceneObjects.push_back(new Sphere("Diffuse sphere"));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(1.0, 0, 0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;

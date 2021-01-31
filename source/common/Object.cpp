@@ -15,6 +15,8 @@ Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
 
     //TODO: Ray-sphere setup
     result.t = raySphereIntersection(p0, V);
+    if (result.t == std::numeric_limits<double>::infinity())
+        return result;
 
     // r(t) = o + td
     // P = r(t), o = p0, d = V
@@ -26,7 +28,7 @@ Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
 
 /* -------------------------------------------------------------------------- */
 /* ------ Ray = p0 + t*V  sphere at origin center and radius radius    : Find t ------- */
-double Sphere::raySphereIntersection(vec4 p0, vec4 V) {
+double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
     double t = std::numeric_limits<double>::infinity();
 
     //TODO: Ray-sphere intersection
@@ -35,16 +37,16 @@ double Sphere::raySphereIntersection(vec4 p0, vec4 V) {
     vec3 rayOrigin = vec3(p0.x, p0.y, p0.z);
     vec3 rayDirection = vec3(V.x, V.y, V.z);
     vec3 centerToRayOrigin = rayOrigin - center;
-    vec3 normalizedCenterToRayOrigin = normalize(centerToRayOrigin);
+    double normalizedCenterToRayOrigin = sqrt(pow(centerToRayOrigin.x, 2) + pow(centerToRayOrigin.y, 2) + pow(centerToRayOrigin.z, 2));
 
     double a = dot(rayDirection, rayDirection);
     double b = 2 * dot(rayDirection, centerToRayOrigin);
-    double c = dot(normalizedCenterToRayOrigin, normalizedCenterToRayOrigin) - pow(radius, 2);
+    double c = pow(normalizedCenterToRayOrigin, 2) - pow(radius, 2);
     double delta = pow(b, 2) - (4*a*c);
 
-    // if (delta < 0) // No intersection, let t be infinity() and return it
-
-    if (delta == 0) // Only 1 intersection
+    if (delta < 0) // No intersection, let t be infinity() and return it
+        return t;
+    else if (delta == 0) // Only 1 intersection
         t = (-b) / (2*a);
     else if (delta > 0) { // Two intersections, keep the positive minimum between s1 and s2
         double s1 = (-b - sqrt(delta)) / (2*a);
@@ -69,7 +71,7 @@ Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
-double Square::raySquareIntersection(vec4 p0, vec4 V) {
+double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
     double t = std::numeric_limits<double>::infinity();
     //TODO: Ray-square intersection;
     return t;
