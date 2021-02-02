@@ -66,10 +66,9 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
 Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
 
-    double t = raySquareIntersection(p0, V);
-    if (t != std::numeric_limits<double>::infinity()) {
-        result.t = t;
-        result.P = p0 + t * V;
+    result.t = raySquareIntersection(p0, V);
+    if (result.t != std::numeric_limits<double>::infinity()) {
+        result.P = p0 + result.t * V;
         result.N = normalize(result.P - point);
     }
     return result;
@@ -78,19 +77,35 @@ Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
-    double t = std::numeric_limits<double>::infinity();
-
     vec3 p0_vec3 = vec3(p0.x, p0.y, p0.z);
     vec3 V_vec3 = vec3(V.x, V.y, V.z);
     vec3 point_vec3 = vec3(point.x, point.y, point.z);
 
     double denom = dot(V_vec3, normal);
-    if (denom != 0) {
-        t = (dot(point_vec3, normal) - dot(p0_vec3, normal)) / denom;
-        if (t > 0)
-            return t;
-        else
-            return std::numeric_limits<double>::infinity();
+    if (denom != 0) { // Avoid +infinity results by dividing by 0
+        double t = (dot(point_vec3, normal) - dot(p0_vec3, normal)) / denom;
+        if (t > EPSILON) { // Point is on a plan which is in front of the camera
+            // Get the point coordinates on the plane
+            vec3 P = p0_vec3 + t * V_vec3;
+
+            // Get mesh rectangle coordinates
+            vec3 v0 = vec3(mesh.vertices[5].x, mesh.vertices[5].y, mesh.vertices[5].z); // Top left
+            vec3 v1 = vec3(mesh.vertices[1].x, mesh.vertices[1].y, mesh.vertices[1].z); // Top right
+            vec3 v2 = vec3(mesh.vertices[2].x, mesh.vertices[2].y, mesh.vertices[2].z); // Bottom right
+            vec3 v3 = vec3(mesh.vertices[3].x, mesh.vertices[3].y, mesh.vertices[3].z); // Bottom left
+
+            // Calculate the scalar products
+            double value1 = dot(normal, cross(v1-v0, P-v0));
+            double value2 = dot(normal, cross(v2-v1, P-v1));
+            double value3 = dot(normal, cross(v3-v2, P-v2));
+            double value4 = dot(normal, cross(v0-v3, P-v3));
+
+            // If all points are one the same side (all values are positive or negative), then the point is within the rectangle
+            if (value1 >= 0 && value2 >= 0 && value3 >= 0 && value4 >= 0)
+                return t;
+            if (value1 <= 0 && value2 <= 0 && value3 <= 0 && value4 <= 0)
+                return t;
+        }
     }
-    return t;
+    return std::numeric_limits<double>::infinity();
 }

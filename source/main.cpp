@@ -300,7 +300,7 @@ void initCornellBox() {
     { //Back Wall
         sceneObjects.push_back(new Square("Back Wall", Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.5, 1.0, 1.0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -343,7 +343,7 @@ void initCornellBox() {
     { //Floor
         sceneObjects.push_back(new Square("Floor", RotateX(-90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.3, 1.0, 0.3, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -357,7 +357,7 @@ void initCornellBox() {
     { //Ceiling
         sceneObjects.push_back(new Square("Ceiling", RotateX(90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.7, 0.5, 0.3, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -372,7 +372,7 @@ void initCornellBox() {
         sceneObjects.push_back(
                 new Square("Front Wall", RotateY(180) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.2, 0.2, 1.0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -387,7 +387,7 @@ void initCornellBox() {
     {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0.0, 0.0, 1.0);
+        _shadingValues.color = vec4(5.0, 0.1, 0.1, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 0.0;
         _shadingValues.Ks = 0.0;
@@ -401,7 +401,7 @@ void initCornellBox() {
     {
         sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 0.0;
         _shadingValues.Ks = 1.0;
