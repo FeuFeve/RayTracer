@@ -66,61 +66,31 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
 Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
 
-    //TODO: Ray-square setup
-    result.t = raySquareIntersection(p0, V);
-    if (result.t == std::numeric_limits<double>::infinity())
-        return result;
-
-    // r(t) = o + td
-    // P = r(t), o = p0, d = V
-    result.P = p0 + (result.t * V);
-    result.N = normal;
-
+    double t = raySquareIntersection(p0, V);
+    if (t != std::numeric_limits<double>::infinity()) {
+        result.t = t;
+        result.P = p0 + t * V;
+        result.N = normalize(result.P - point);
+    }
     return result;
-
 }
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
-//    double t = std::numeric_limits<double>::infinity();
+    double t = std::numeric_limits<double>::infinity();
 
-    vec3 a = vec3(mesh.vertices[5].x, mesh.vertices[5].y, mesh.vertices[5].z); //a.w = 0;// up left
-    vec3 b = vec3(mesh.vertices[1].x, mesh.vertices[1].y, mesh.vertices[1].z); //b.w = 0;// up right
-    vec3 c = vec3(mesh.vertices[2].x, mesh.vertices[2].y, mesh.vertices[2].z); //c.w = 0;// down right
-    vec3 planeNormal = cross(b - a, c - a);
-//    printf("planeNormal=(%f, %f, %f)\n", planeNormal.x, planeNormal.y, planeNormal.z);
+    vec3 p0_vec3 = vec3(p0.x, p0.y, p0.z);
+    vec3 V_vec3 = vec3(V.x, V.y, V.z);
+    vec3 point_vec3 = vec3(point.x, point.y, point.z);
 
-    //TODO: Ray-square intersection;
-    vec3 rayOrigin = vec3(p0.x, p0.y, p0.z); // o
-    vec3 rayDirection = vec3(V.x, V.y, V.z); // d
-    double distance = point.x*normal.x + point.y*normal.y + point.z*normal.z; // D
-
-    double denom = dot(planeNormal, rayDirection);
-    double denom2 = dot(normal, rayDirection);
-    printf("denom=%f, denom2=%f\n", denom, denom2);
-
-    double dDotN = dot(rayDirection, normal); // d.n
-    if (dDotN == 0) // The ray is parallel and distinct from the plane
-    {
-        printf("t == +infinity (parallel)\n\n");
-        return std::numeric_limits<double>::infinity();
-    }
-
-    double t = (distance * dot(rayOrigin, normal)) / dDotN;
-//    printf("o=(%f, %f, %f), d=(%f, %f, %f), a=(%f, %f, %f), n=(%f, %f, %f)\n", p0.x, p0.y, p0.z, V.x, V.y, V.z, point.x, point.y, point.z, normal.x, normal.y, normal.z);
-//    printf("distance=%f, dot(rayOrigin, normal)=%f, dDotN=%f\n", distance, dot(rayOrigin, normal), dDotN);
-    if (t > 0) // Intersection in front of the camera
-    {
-        printf("t > 0 (intersection in front of the camera)\n\n");
-        return t;
-    }
-    else // Intersection behind the camera, or no intersection
-    {
-        if (t == 0)
-            printf("t == 0 (ray into plane)\n\n");
+    double denom = dot(V_vec3, normal);
+    if (denom != 0) {
+        t = (dot(point_vec3, normal) - dot(p0_vec3, normal)) / denom;
+        if (t > 0)
+            return t;
         else
-            printf("t < 0 (intersection behind the camera\n\n");
-        return std::numeric_limits<double>::infinity();
+            return std::numeric_limits<double>::infinity();
     }
+    return t;
 }

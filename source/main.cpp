@@ -240,7 +240,7 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     //TODO: Raytracing code here
     std::vector<Object::IntersectionValues> intersectionValues;
     for (int i = 0; i < sceneObjects.size(); i++) {
-        intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir)); // TODO Object.cpp Sphere::intersect
+        intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir));
         intersectionValues[intersectionValues.size()-1].ID_ = i;
     }
 
