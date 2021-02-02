@@ -244,9 +244,12 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
         intersectionValues[intersectionValues.size()-1].ID_ = i;
     }
 
+    double min = std::numeric_limits<double>::infinity();
     for (auto & intersectionValue : intersectionValues) {
-        if (intersectionValue.t != std::numeric_limits<double>::infinity()) {
+        if (intersectionValue.t != std::numeric_limits<double>::infinity()
+                && intersectionValue.t < min) {
             color = sceneObjects[intersectionValue.ID_]->shadingValues.color;
+            min = intersectionValue.t;
         }
     }
 
@@ -421,9 +424,23 @@ void initUnitSphere() {
     sceneObjects.clear();
 
     {
-        sceneObjects.push_back(new Sphere("Diffuse sphere"));
+        sceneObjects.push_back(new Sphere("Diffuse sphere", vec3(1.0, 0.0, 0.0)));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0, 0, 1.0);
+        _shadingValues.Ka = 0.0;
+        _shadingValues.Kd = 1.0;
+        _shadingValues.Ks = 0.0;
+        _shadingValues.Kn = 16.0;
+        _shadingValues.Kt = 0.0;
+        _shadingValues.Kr = 0.0;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
+
+    {
+        sceneObjects.push_back(new Sphere("Diffuse sphere 2", vec3(-1.0, 0.0, 0.0)));
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = vec4(0, 1, 0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -448,7 +465,7 @@ void initUnitSquare() {
     { //Back Wall
         sceneObjects.push_back(new Square("Unit Square"));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(1.0, 0, 0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
