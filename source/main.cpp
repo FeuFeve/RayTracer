@@ -241,13 +241,13 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     std::vector<Object::IntersectionValues> intersectionValues;
     for (int i = 0; i < sceneObjects.size(); i++) {
         intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir));
-        intersectionValues[intersectionValues.size()-1].ID_ = i;
+        intersectionValues[intersectionValues.size() - 1].ID_ = i;
     }
 
     double min = std::numeric_limits<double>::infinity();
-    for (auto & intersectionValue : intersectionValues) {
+    for (auto &intersectionValue : intersectionValues) {
         if (intersectionValue.t != std::numeric_limits<double>::infinity()
-                && intersectionValue.t < min) {
+            && intersectionValue.t < min) {
             color = sceneObjects[intersectionValue.ID_]->shadingValues.color;
             min = intersectionValue.t;
         }
@@ -485,19 +485,26 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        scene = _SPHERE;
-        initUnitSphere();
+        if (scene != _SPHERE) {
+            initUnitSphere();
+            initGL();
+            scene = _SPHERE;
+        }
     }
     if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-        scene = _SQUARE;
-        initUnitSquare();
+        if (scene != _SQUARE) {
+            initUnitSquare();
+            initGL();
+            scene = _SQUARE;
+        }
     }
     if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-        scene = _BOX;
-        initCornellBox();
+        if (scene != _BOX) {
+            initCornellBox();
+            initGL();
+            scene = _BOX;
+        }
     }
-
-    initGL();
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
         rayTrace();
 }
