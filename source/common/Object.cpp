@@ -82,13 +82,13 @@ double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
     vec3 point_vec3 = vec3(point.x, point.y, point.z);
 
     double denom = dot(V_vec3, normal);
-    if (denom != 0) { // Avoid +infinity results by dividing by 0
+    if (denom != 0) { // Avoid +infinity results when dividing by 0
         double t = (dot(point_vec3, normal) - dot(p0_vec3, normal)) / denom;
-        if (t > EPSILON) { // Point is on a plan which is in front of the camera
+        if (t > EPSILON) { // The point is on a plan which is in front of the camera
             // Get the point coordinates on the plane
             vec3 P = p0_vec3 + t * V_vec3;
 
-            // Get mesh rectangle coordinates
+            // Get the mesh rectangle coordinates
             vec3 v0 = vec3(mesh.vertices[5].x, mesh.vertices[5].y, mesh.vertices[5].z); // Top left
             vec3 v1 = vec3(mesh.vertices[1].x, mesh.vertices[1].y, mesh.vertices[1].z); // Top right
             vec3 v2 = vec3(mesh.vertices[2].x, mesh.vertices[2].y, mesh.vertices[2].z); // Bottom right
@@ -100,7 +100,7 @@ double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
             double value3 = dot(normal, cross(v3-v2, P-v2));
             double value4 = dot(normal, cross(v0-v3, P-v3));
 
-            // If all points are one the same side (all values are positive or negative), then the point is within the rectangle
+            // If all the points are one the same side (all values are positive or negative), then the point is within the rectangle
             if (value1 >= 0 && value2 >= 0 && value3 >= 0 && value4 >= 0)
                 return t;
             if (value1 <= 0 && value2 <= 0 && value3 <= 0 && value4 <= 0)
