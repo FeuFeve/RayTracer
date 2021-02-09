@@ -21,7 +21,7 @@ Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
     // r(t) = o + td
     // P = r(t), o = p0, d = V
     result.P = p0 + (result.t * V);
-    result.N = p0 - center;
+    result.N = result.P - center;
 
     return result;
 }
@@ -69,7 +69,7 @@ Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     result.t = raySquareIntersection(p0, V);
     if (result.t != std::numeric_limits<double>::infinity()) {
         result.P = p0 + result.t * V;
-        result.N = normalize(result.P - point);
+        result.N = normalize(result.P - normal);
     }
     return result;
 }

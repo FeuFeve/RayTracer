@@ -246,15 +246,13 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 
     double min = std::numeric_limits<double>::infinity();
     for (auto &intersectionValue : intersectionValues) {
-        if (intersectionValue.t != std::numeric_limits<double>::infinity()
-            && intersectionValue.t < min) {
+        if (intersectionValue.t != std::numeric_limits<double>::infinity() && intersectionValue.t < min) {
             color = sceneObjects[intersectionValue.ID_]->shadingValues.color;
             min = intersectionValue.t;
         }
     }
 
     return color;
-
 }
 
 /* -------------------------------------------------------------------------- */
@@ -387,7 +385,7 @@ void initCornellBox() {
     {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(5.0, 0.1, 0.1, 1.0);
+        _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 0.0;
         _shadingValues.Ks = 0.0;
