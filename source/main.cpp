@@ -221,7 +221,7 @@ void castRayDebug(vec4 p0, vec4 dir) {
 
 }
 
-color4 calculateIllumination(Object::IntersectionValues intersectionValue) {
+color4 calculateIllumination(Object::IntersectionValues intersectionValue, vec4 dir) {
     color4 finalColor = color4();
     Object::ShadingValues shadingValues = sceneObjects[intersectionValue.ID_]->shadingValues;
 
@@ -247,11 +247,20 @@ color4 calculateIllumination(Object::IntersectionValues intersectionValue) {
     diffuseIntensity.limit();
 
     // Specular light intensity
+    vec3 reflexionDirection = 2 * dot(surfaceNormal, pointToLight) * surfaceNormal - pointToLight;
+    vec3 pointToObserver = -vec3(dir.x, dir.y, dir.z);
+    factor = shadingValues.Ks * pow(dot(reflexionDirection, pointToObserver), 1);
 
+    color4 specularIntensity = GLState::light_specular * color4(
+            shadingValues.color.x * factor,
+            shadingValues.color.y * factor,
+            shadingValues.color.z * factor,
+            1.0);
+    specularIntensity.limit();
 
     // Final color
 
-    finalColor = ambientIntensity + diffuseIntensity;
+    finalColor = ambientIntensity + diffuseIntensity + specularIntensity;
     finalColor.limit();
     return finalColor;
 }
@@ -290,7 +299,7 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     }
 
     if (id != -1)
-        color = calculateIllumination(intersectionValues[id]);
+        color = calculateIllumination(intersectionValues[id], dir);
 
     return color;
 }
@@ -426,8 +435,8 @@ void initCornellBox() {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
-        _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 1.0;
+        _shadingValues.Ka = 0.1;
+        _shadingValues.Kd = 0.9;
         _shadingValues.Ks = 0.0;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 1.0;
@@ -440,9 +449,9 @@ void initCornellBox() {
         sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
-        _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 1.0;
-        _shadingValues.Ks = 1.0;
+        _shadingValues.Ka = 0.1;
+        _shadingValues.Kd = 0.0;
+        _shadingValues.Ks = 0.9;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 0.0;
         _shadingValues.Kr = 0.0;
