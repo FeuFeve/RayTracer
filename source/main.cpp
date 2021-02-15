@@ -8,10 +8,12 @@
 #include "common.h"
 #include "SourcePath.h"
 #include <io.h>
+#include <cmath>
 #include <cstdlib>
 #include <cstdio>
 
 using namespace Angel;
+using namespace std;
 
 typedef vec4 color4;
 typedef vec4 point4;
@@ -219,6 +221,41 @@ void castRayDebug(vec4 p0, vec4 dir) {
 
 }
 
+color4 calculateIllumination(Object::IntersectionValues intersectionValue) {
+    color4 finalColor = color4();
+    Object::ShadingValues shadingValues = sceneObjects[intersectionValue.ID_]->shadingValues;
+
+    // Ambient light intensity
+    color4 ambientIntensity = GLState::light_ambient * color4(
+            shadingValues.color.x * shadingValues.Ka,
+            shadingValues.color.y * shadingValues.Ka,
+            shadingValues.color.z * shadingValues.Ka,
+            1.0);
+    ambientIntensity.limit();
+
+    // Diffuse light intensity
+    vec3 pointPosition = vec3(intersectionValue.P.x, intersectionValue.P.y, intersectionValue.P.z);
+    vec3 pointToLight = vec3(lightPosition.x, lightPosition.y, lightPosition.z) - pointPosition;
+    vec3 surfaceNormal = vec3(intersectionValue.N.x, intersectionValue.N.y, intersectionValue.N.z);
+
+    double factor = shadingValues.Kd * dot(normalize(surfaceNormal), normalize(pointToLight));
+    color4 diffuseIntensity = GLState::light_diffuse * color4(
+            shadingValues.color.x * factor,
+            shadingValues.color.y * factor,
+            shadingValues.color.z * factor,
+            1.0);
+    diffuseIntensity.limit();
+
+    // Specular light intensity
+
+
+    // Final color
+
+    finalColor = ambientIntensity + diffuseIntensity;
+    finalColor.limit();
+    return finalColor;
+}
+
 /* -------------------------------------------------------------------------- */
 bool shadowFeeler(vec4 p0, Object *object) {
     bool inShadow = false;
@@ -237,7 +274,6 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 
     if (depth > maxDepth) return color;
 
-    //TODO: Raytracing code here
     std::vector<Object::IntersectionValues> intersectionValues;
     for (int i = 0; i < sceneObjects.size(); i++) {
         intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir));
@@ -245,12 +281,16 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     }
 
     double min = std::numeric_limits<double>::infinity();
+    int id = -1;
     for (auto &intersectionValue : intersectionValues) {
         if (intersectionValue.t != std::numeric_limits<double>::infinity() && intersectionValue.t < min) {
-            color = sceneObjects[intersectionValue.ID_]->shadingValues.color;
             min = intersectionValue.t;
+            id = intersectionValue.ID_;
         }
     }
+
+    if (id != -1)
+        color = calculateIllumination(intersectionValues[id]);
 
     return color;
 }
@@ -312,7 +352,7 @@ void initCornellBox() {
     { //Left Wall
         sceneObjects.push_back(new Square("Left Wall", RotateY(90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0.0, 0.0, 1.0);
+        _shadingValues.color = vec4(0.8, 0.0, 0.0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -355,7 +395,7 @@ void initCornellBox() {
     { //Ceiling
         sceneObjects.push_back(new Square("Ceiling", RotateX(90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.7, 0.5, 0.3, 1.0);
+        _shadingValues.color = vec4(1.0, 0.5, 0.0, 1.0);
         _shadingValues.Ka = 0.0;
         _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
@@ -387,11 +427,11 @@ void initCornellBox() {
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
         _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 0.0;
+        _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 0.0;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 1.0;
-        _shadingValues.Kr = 1.4;
+        _shadingValues.Kr = 1.4; // TODO: 1.4 > 1.0, la valeur est-elle juste ? N'est-elle pas censée être sur la Mirrored Sphere ?
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
@@ -401,7 +441,7 @@ void initCornellBox() {
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 0.0;
+        _shadingValues.Kd = 1.0;
         _shadingValues.Ks = 1.0;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 0.0;

@@ -22,12 +22,12 @@ public:
 
     typedef struct{
         vec4 color;
-        float Kd;
-        float Ks;
-        float Kn;
-        float Kt;
-        float Ka;
-        float Kr;
+        float Kd; // Coefficient de réflexion diffuse de l'objet
+        float Ks; // Coefficient de réflexion spéculaire de l'objet
+        float Kn; // Brillance du matériaux
+        float Kt; // Transparence du matériaux (?)
+        float Ka; // Coefficient de réflexion ambiante de l'objet
+        float Kr; // Réflectivité du matériaux (?)
     } ShadingValues;
 
     typedef struct{

@@ -5,24 +5,21 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 
 #include "common.h"
+
+using namespace std;
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
-
-    //TODO: Ray-sphere setup
     result.t = raySphereIntersection(p0, V);
-    if (result.t == std::numeric_limits<double>::infinity())
-        return result;
-
-    // r(t) = o + td
-    // P = r(t), o = p0, d = V
-    result.P = p0 + (result.t * V);
-    result.N = result.P - center;
-
+    if (result.t != std::numeric_limits<double>::infinity()) {
+        result.P = p0 + (result.t * V);
+        result.N = normalize(result.P - center);
+    }
     return result;
 }
 
@@ -65,11 +62,10 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
 /* -------------------------------------------------------------------------- */
 Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
-
     result.t = raySquareIntersection(p0, V);
     if (result.t != std::numeric_limits<double>::infinity()) {
         result.P = p0 + result.t * V;
-        result.N = normalize(result.P - normal);
+        result.N = normal;
     }
     return result;
 }

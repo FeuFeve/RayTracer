@@ -358,7 +358,7 @@ struct vec4 {
 	{ return vec4( s*x, s*y, s*z, s*w ); }
 
     vec4 operator * ( const vec4& v ) const
-	{ return vec4( x*v.x, y*v.y, z*v.z, w*v.z ); }
+	{ return vec4( x*v.x, y*v.y, z*v.z, w*v.w ); }
 
     friend vec4 operator * ( const GLfloat s, const vec4& v )
 	{ return v * s; }
@@ -427,6 +427,17 @@ struct vec4 {
 
     operator GLfloat* ()
 	{ return static_cast<GLfloat*>( &x ); }
+
+    void limit() {
+        if (x < 0) x = 0;
+        else if (x > 1) x = 1;
+        if (y < 0) y = 0;
+        else if (y > 1) y = 1;
+        if (z < 0) z = 0;
+        else if (z > 1) z = 1;
+        if (w < 0) w = 0;
+        else if (w > 1) w = 1;
+    }
 };
 
 //----------------------------------------------------------------------------
