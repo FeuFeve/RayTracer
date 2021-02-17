@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <chrono>
 
 using namespace Angel;
 using namespace std;
@@ -265,13 +266,54 @@ color4 calculateIllumination(Object::IntersectionValues intersectionValue, vec4 
     return finalColor;
 }
 
-/* -------------------------------------------------------------------------- */
-bool shadowFeeler(vec4 p0, Object *object) {
-    bool inShadow = false;
+// Cast a ray to the light source in the scene, if the ray intersects an object and the intersection occurs before
+// the ray arrived to the light source, then the light from the light source is blocked by an object
+// If the light is blocked return true, else return false
+bool pointIsInShadow(const vec4& point, const vec4& lightPos = lightPosition) {
+    vec4 pointToLight = lightPos - point;
+    vec4 pointEpsilon = point + 0.5 * pointToLight;
+    vec4 pointEpsilonToLight = lightPos - pointEpsilon;
 
-    //TODO: Shadow code here
+    std::vector<Object::IntersectionValues> intersectionValuesVector;
+    for (int i = 0; i < sceneObjects.size(); i++) {
+        intersectionValuesVector.push_back(sceneObjects[i]->intersect(pointEpsilon, pointEpsilonToLight));
+        intersectionValuesVector[intersectionValuesVector.size() - 1].ID_ = i;
+    }
 
-    return inShadow;
+    vec3 vec3PointEpsilonToLight = vec3(pointEpsilonToLight.x, pointEpsilonToLight.y, pointEpsilonToLight.z);
+    for (auto &intersectionValues : intersectionValuesVector) {
+        if (intersectionValues.t != std::numeric_limits<double>::infinity()) {
+            vec4 pointEpsilonToObject = intersectionValues.P - pointEpsilon;
+            vec3 vec3PointEpsilonToObject = vec3(pointEpsilonToObject.x, pointEpsilonToObject.y, pointEpsilonToObject.z);
+
+            if (length(vec3PointEpsilonToObject) < length(vec3PointEpsilonToLight))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+double randomDouble(double min, double max) {
+    double d = (double) rand() / RAND_MAX;
+    return min + d * (max - min);
+}
+
+double factorPointIsInShadow(const vec4& point, double maxLightSize, int iterations) {
+    using namespace std::chrono;
+    uint64_t ns = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+    srand(ns);
+
+    double total = 0;
+    double halfMaxLightSize = maxLightSize / 2;
+    for (int i = 0; i < iterations; i++) {
+        double x = lightPosition.x + randomDouble(-halfMaxLightSize, halfMaxLightSize);
+        double z = lightPosition.z + randomDouble(-halfMaxLightSize, halfMaxLightSize);
+        if (!pointIsInShadow(point, vec4(x, lightPosition.y, z, lightPosition.w)))
+            total++;
+    }
+
+    return total / iterations;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -283,23 +325,30 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 
     if (depth > maxDepth) return color;
 
-    std::vector<Object::IntersectionValues> intersectionValues;
+    std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
-        intersectionValues.push_back(sceneObjects[i]->intersect(p0, dir));
-        intersectionValues[intersectionValues.size() - 1].ID_ = i;
+        intersectionValuesVector.push_back(sceneObjects[i]->intersect(p0, dir));
+        intersectionValuesVector[intersectionValuesVector.size() - 1].ID_ = i;
     }
 
     double min = std::numeric_limits<double>::infinity();
     int id = -1;
-    for (auto &intersectionValue : intersectionValues) {
-        if (intersectionValue.t != std::numeric_limits<double>::infinity() && intersectionValue.t < min) {
-            min = intersectionValue.t;
-            id = intersectionValue.ID_;
+    for (auto &intersectionValues : intersectionValuesVector) {
+        if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t < min) {
+            min = intersectionValues.t;
+            id = intersectionValues.ID_;
         }
     }
 
-    if (id != -1)
-        color = calculateIllumination(intersectionValues[id], dir);
+    double factor = 1;
+    if (id != -1) {
+        if (pointIsInShadow(intersectionValuesVector[id].P)) {
+//            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 0.5, 100);
+            factor = 0;
+        }
+        color = factor * calculateIllumination(intersectionValuesVector[id], dir);
+        color.w = 1.0;
+    }
 
     return color;
 }
