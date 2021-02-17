@@ -32,7 +32,9 @@ public:
 
     typedef struct{
         double t;
+        double t2;
         vec4 P;
+        vec4 P2;
         vec4 N;
         int ID_;
         std::string name;
@@ -81,7 +83,7 @@ public:
     virtual IntersectionValues intersect(vec4 p0, vec4 V);
     
 private:
-    double raySphereIntersection(const vec4& p0, const vec4& V);
+    vec2 raySphereIntersection(const vec4& p0, const vec4& V);
     vec3 center;
     double radius;
 };

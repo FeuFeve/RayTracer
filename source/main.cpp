@@ -269,24 +269,28 @@ color4 calculateIllumination(Object::IntersectionValues intersectionValue, vec4 
 // Cast a ray to the light source in the scene, if the ray intersects an object and the intersection occurs before
 // the ray arrived to the light source, then the light from the light source is blocked by an object
 // If the light is blocked return true, else return false
-bool pointIsInShadow(const vec4& point, const vec4& lightPos = lightPosition) {
+bool pointIsInShadow(const vec4 &point, const vec4 &lightPos = lightPosition) {
     vec4 pointToLight = lightPos - point;
-    vec4 pointEpsilon = point + 0.5 * pointToLight;
-    vec4 pointEpsilonToLight = lightPos - pointEpsilon;
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
-        intersectionValuesVector.push_back(sceneObjects[i]->intersect(pointEpsilon, pointEpsilonToLight));
+        intersectionValuesVector.push_back(sceneObjects[i]->intersect(point, pointToLight));
         intersectionValuesVector[intersectionValuesVector.size() - 1].ID_ = i;
     }
 
-    vec3 vec3PointEpsilonToLight = vec3(pointEpsilonToLight.x, pointEpsilonToLight.y, pointEpsilonToLight.z);
     for (auto &intersectionValues : intersectionValuesVector) {
-        if (intersectionValues.t != std::numeric_limits<double>::infinity()) {
-            vec4 pointEpsilonToObject = intersectionValues.P - pointEpsilon;
-            vec3 vec3PointEpsilonToObject = vec3(pointEpsilonToObject.x, pointEpsilonToObject.y, pointEpsilonToObject.z);
+        double lengthFromPointToLight = length(pointToLight);
 
-            if (length(vec3PointEpsilonToObject) < length(vec3PointEpsilonToLight))
+        if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t >= 0) {
+            vec4 pointToP = intersectionValues.P - point;
+            double lengthFromPointToP = length(pointToP);
+            if (lengthFromPointToP > EPSILON && lengthFromPointToP < lengthFromPointToLight)
+                return true;
+        }
+        if (intersectionValues.t2 != std::numeric_limits<double>::infinity() && intersectionValues.t2 >= 0) {
+            vec4 pointToP2 = intersectionValues.P2 - point;
+            double lengthFromPointToP2 = length(pointToP2);
+            if (lengthFromPointToP2 > EPSILON && lengthFromPointToP2 < lengthFromPointToLight)
                 return true;
         }
     }
@@ -299,7 +303,7 @@ double randomDouble(double min, double max) {
     return min + d * (max - min);
 }
 
-double factorPointIsInShadow(const vec4& point, double maxLightSize, int iterations) {
+double factorPointIsInShadow(const vec4 &point, double maxLightSize, int iterations) {
     using namespace std::chrono;
     uint64_t ns = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     srand(ns);
@@ -343,8 +347,8 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     double factor = 1;
     if (id != -1) {
         if (pointIsInShadow(intersectionValuesVector[id].P)) {
-//            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 0.5, 100);
-            factor = 0;
+            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
+//            factor = 0;
         }
         color = factor * calculateIllumination(intersectionValuesVector[id], dir);
         color.w = 1.0;
@@ -481,7 +485,7 @@ void initCornellBox() {
 
 
     {
-        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
+        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.75), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
         _shadingValues.Ka = 0.1;
@@ -495,7 +499,7 @@ void initCornellBox() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -1.25, 0.5), 0.75));
+        sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -0.5, -1.0), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = 0.1;
