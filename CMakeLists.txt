@@ -41,7 +41,7 @@ add_executable(raytracer WIN32 MACOSX_BUNDLE
 	source/common/Object.h
 	source/common/vec.h
 	shaders/fshader.glsl
-    shaders/vshader.glsl)
+    shaders/vshader.glsl source/common/ImageRenderer.cpp source/common/ImageRenderer.h)
 
 #Windows cleanup
 if (MSVC)

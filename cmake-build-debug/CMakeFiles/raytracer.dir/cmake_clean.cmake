@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/raytracer.dir/source/common/ImageRenderer.cpp.obj"
   "CMakeFiles/raytracer.dir/source/common/ObjMesh.cpp.obj"
   "CMakeFiles/raytracer.dir/source/common/Object.cpp.obj"
   "CMakeFiles/raytracer.dir/source/common/SourcePath.cpp.obj"

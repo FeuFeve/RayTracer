@@ -208,6 +208,33 @@ glfw-3.2/deps/glad.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\glad.dir\build.make CMakeFiles/glad.dir/glfw-3.2/deps/glad.c.s
 .PHONY : glfw-3.2/deps/glad.c.s
 
+source/common/ImageRenderer.obj: source/common/ImageRenderer.cpp.obj
+
+.PHONY : source/common/ImageRenderer.obj
+
+# target to build an object file
+source/common/ImageRenderer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\raytracer.dir\build.make CMakeFiles/raytracer.dir/source/common/ImageRenderer.cpp.obj
+.PHONY : source/common/ImageRenderer.cpp.obj
+
+source/common/ImageRenderer.i: source/common/ImageRenderer.cpp.i
+
+.PHONY : source/common/ImageRenderer.i
+
+# target to preprocess a source file
+source/common/ImageRenderer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\raytracer.dir\build.make CMakeFiles/raytracer.dir/source/common/ImageRenderer.cpp.i
+.PHONY : source/common/ImageRenderer.cpp.i
+
+source/common/ImageRenderer.s: source/common/ImageRenderer.cpp.s
+
+.PHONY : source/common/ImageRenderer.s
+
+# target to generate assembly for a file
+source/common/ImageRenderer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\raytracer.dir\build.make CMakeFiles/raytracer.dir/source/common/ImageRenderer.cpp.s
+.PHONY : source/common/ImageRenderer.cpp.s
+
 source/common/ObjMesh.obj: source/common/ObjMesh.cpp.obj
 
 .PHONY : source/common/ObjMesh.obj
@@ -358,6 +385,9 @@ help:
 	@echo ... glfw-3.2/deps/glad.obj
 	@echo ... glfw-3.2/deps/glad.i
 	@echo ... glfw-3.2/deps/glad.s
+	@echo ... source/common/ImageRenderer.obj
+	@echo ... source/common/ImageRenderer.i
+	@echo ... source/common/ImageRenderer.s
 	@echo ... source/common/ObjMesh.obj
 	@echo ... source/common/ObjMesh.i
 	@echo ... source/common/ObjMesh.s

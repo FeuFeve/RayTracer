@@ -12,8 +12,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
-#include <thread>
-#include <functional>
 
 using namespace Angel;
 using namespace std;
@@ -359,64 +357,75 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     return color;
 }
 
-void rayTraceThread(int fromLine, int toLine, unsigned char *buffer) {
-//    cout << "Thread " << this_thread::get_id() << " is working on lines " << fromLine << " to " << toLine << endl;
-    for (unsigned int x = 0; x < GLState::window_width; x++) {
-        for (unsigned int y = fromLine; y < toLine; y++) {
+//void rayTraceThread(vector<unsigned char> vectorBuffer, int fromLine, int toLine) {
+////    std::vector<unsigned char> &vectorBuffer, int fromLine, int toLine
+////    cout << "Thread " << this_thread::get_id() << " is working on lines " << fromLine << " to " << toLine << endl;
+//    for (int x = 0; x < GLState::window_width; x++) {
+//        for (int y = fromLine; y < toLine; y++) {
+//            int index = 4 * (y * GLState::window_width + x);
+//            std::vector<vec4> ray_o_dir = findRay(x, y);
+//            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
+//            vectorBuffer[index] = color.x * 255;
+//            vectorBuffer[index + 1] = color.y * 255;
+//            vectorBuffer[index + 2] = color.z * 255;
+//            vectorBuffer[index + 3] = color.w * 255;
+////            cout << "#" << this_thread::get_id() << " RGBA for pixel (" << x << ", " << y << ") is: " << color << endl;
+//        }
+//    }
+//}
 
-            int index = y * GLState::window_width + x;
-            std::vector<vec4> ray_o_dir = findRay(x, y);
-            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
-            buffer[4 * index] = color.x * 255;
-            buffer[4 * index + 1] = color.y * 255;
-            buffer[4 * index + 2] = color.z * 255;
-            buffer[4 * index + 3] = color.w * 255;
-//            cout << "#" << this_thread::get_id() << " RGBA for pixel (" << x << ", " << y << ") is: " << color << endl;
-        }
-    }
-}
+//void* threadHelper(void* args) {
+//    cout << "thread launched" << endl;
+////    auto *threadData = (ThreadData*) args;
+////    rayTraceThread(threadData->vectorBuffer, threadData->fromLine, threadData->toLine);
+//    return nullptr;
+//}
 
 /* -------------------------------------------------------------------------- */
 /* ------------  Ray trace our scene.  Output color to image and    --------- */
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace() {
 
-    unsigned char *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
+    std::vector<unsigned char> vectorBuffer(GLState::window_width * GLState::window_height * 4, 0);
+
+//    ImageRenderer::render(4);
+
+//    ThreadData threadData = { vectorBuffer, 0, GLState::window_height };
+//    pthread_t threadID;
+//    pthread_create(nullptr, nullptr, nullptr, nullptr);
+//    cout << "s = " << s << endl;
 
     // Create and start threads
-    int nbOfThreads = 8;
-    std::vector<std::thread> threads;
-    for (int i = 0; i < nbOfThreads; i++) {
-        int minLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * i);
-        int maxLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * (i + 1));
-//        std::thread worker(rayTraceThread, minLine, maxLine, buffer);
-        threads.emplace_back(rayTraceThread, minLine, maxLine, buffer);
-    }
-
-    // Wait for each thread to finish its work
-    for (auto &worker : threads) {
-        worker.join();
-    }
-
-//    for (unsigned int i = 0; i < GLState::window_width; i++) {
-//        for (unsigned int j = 0; j < GLState::window_height; j++) {
-//
-//            int idx = j * GLState::window_width + i;
-//            std::vector<vec4> ray_o_dir = findRay(i, j);
-//            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), NULL, 0);
-//            buffer[4 * idx] = color.x * 255;
-//            buffer[4 * idx + 1] = color.y * 255;
-//            buffer[4 * idx + 2] = color.z * 255;
-//            buffer[4 * idx + 3] = color.w * 255;
-//        }
+//    int nbOfThreads = 8;
+//    vector<thread> threads;
+//    for (int i = 0; i < nbOfThreads; i++) {
+//        int minLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * i);
+//        int maxLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * (i + 1));
+//        threads.emplace_back(thread(rayTraceThread, minLine, maxLine, ref(vectorBuffer)));
 //    }
 //
-//    for (unsigned int i = 0; i < GLState::window_width; i++) {
-//        for (unsigned int j = 0; j < GLState::window_height; j++) {
-//            int idx = j * GLState::window_width + i;
-//            cout << buffer[4 * idx] << "..." << buffer[4 * idx + 1] << "..."<< buffer[4 * idx + 2] << "..."<< buffer[4 * idx + 3] << endl;
+//    // Wait for each thread to finish its work
+//    for (auto &worker : threads) {
+//        worker.join();
+//    }
+
+//    for (int i = 0; i < GLState::window_width; i++) {
+//        for (int j = 0; j < GLState::window_height; j++) {
+//            int index = 4 * (j * GLState::window_width + i);
+//            vector<vec4> ray_o_dir = findRay(i, j);
+//            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
+//            vectorBuffer[index] = color.x * 255;
+//            vectorBuffer[index + 1] = color.y * 255;
+//            vectorBuffer[index + 2] = color.z * 255;
+//            vectorBuffer[index + 3] = color.w * 255;
 //        }
 //    }
+
+//    for (auto &character : vectorBuffer) {
+//        cout << (int) character << endl;
+//    }
+
+    unsigned char *buffer = &vectorBuffer[0];
     write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);
 
     delete[] buffer;
@@ -873,7 +882,7 @@ int main(void) {
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    window = glfwCreateWindow(64, 64, "Raytracer", NULL, NULL);
+    window = glfwCreateWindow(768, 768, "Raytracer", NULL, NULL);
     if (!window) {
         glfwTerminate();
         exit(EXIT_FAILURE);

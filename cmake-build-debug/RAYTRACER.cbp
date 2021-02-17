@@ -359,6 +359,12 @@
 		<Unit filename="C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/common/CheckError.h">
 			<Option target="raytracer"/>
 		</Unit>
+		<Unit filename="C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/common/ImageRenderer.cpp">
+			<Option target="raytracer"/>
+		</Unit>
+		<Unit filename="C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/common/ImageRenderer.h">
+			<Option target="raytracer"/>
+		</Unit>
 		<Unit filename="C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/source/common/ObjMesh.cpp">
 			<Option target="raytracer"/>
 		</Unit>
