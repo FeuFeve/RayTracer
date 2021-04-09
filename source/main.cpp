@@ -386,44 +386,9 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace() {
 
+    
+
     std::vector<unsigned char> vectorBuffer(GLState::window_width * GLState::window_height * 4, 0);
-
-//    ImageRenderer::render(4);
-
-//    ThreadData threadData = { vectorBuffer, 0, GLState::window_height };
-//    pthread_t threadID;
-//    pthread_create(nullptr, nullptr, nullptr, nullptr);
-//    cout << "s = " << s << endl;
-
-    // Create and start threads
-//    int nbOfThreads = 8;
-//    vector<thread> threads;
-//    for (int i = 0; i < nbOfThreads; i++) {
-//        int minLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * i);
-//        int maxLine = (int) round(( (double) GLState::window_height / (double) nbOfThreads) * (i + 1));
-//        threads.emplace_back(thread(rayTraceThread, minLine, maxLine, ref(vectorBuffer)));
-//    }
-//
-//    // Wait for each thread to finish its work
-//    for (auto &worker : threads) {
-//        worker.join();
-//    }
-
-//    for (int i = 0; i < GLState::window_width; i++) {
-//        for (int j = 0; j < GLState::window_height; j++) {
-//            int index = 4 * (j * GLState::window_width + i);
-//            vector<vec4> ray_o_dir = findRay(i, j);
-//            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
-//            vectorBuffer[index] = color.x * 255;
-//            vectorBuffer[index + 1] = color.y * 255;
-//            vectorBuffer[index + 2] = color.z * 255;
-//            vectorBuffer[index + 3] = color.w * 255;
-//        }
-//    }
-
-//    for (auto &character : vectorBuffer) {
-//        cout << (int) character << endl;
-//    }
 
     unsigned char *buffer = &vectorBuffer[0];
     write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);

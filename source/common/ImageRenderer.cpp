@@ -10,10 +10,10 @@
 using namespace std;
 
 void renderOnThread() {
-    cout << "Thread " << this_thread::get_id() << endl;
+//    cout << "Thread " << this_thread::get_id() << endl;
 }
 
 void ImageRenderer::render(int nbOfThreads) {
-    thread t1(renderOnThread);
-    t1.join();
+//    thread t1(renderOnThread);
+//    t1.join();
 }
