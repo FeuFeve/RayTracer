@@ -236,10 +236,10 @@ color4 calculateIllumination(Object::IntersectionValues intersectionValue, vec4 
 
     // Diffuse light intensity
     vec3 pointPosition = vec3(intersectionValue.P.x, intersectionValue.P.y, intersectionValue.P.z);
-    vec3 pointToLight = vec3(lightPosition.x, lightPosition.y, lightPosition.z) - pointPosition;
-    vec3 surfaceNormal = vec3(intersectionValue.N.x, intersectionValue.N.y, intersectionValue.N.z);
+    vec3 pointToLight = normalize(vec3(lightPosition.x, lightPosition.y, lightPosition.z) - pointPosition);
+    vec3 surfaceNormal = normalize(vec3(intersectionValue.N.x, intersectionValue.N.y, intersectionValue.N.z));
 
-    double factor = shadingValues.Kd * dot(normalize(surfaceNormal), normalize(pointToLight));
+    double factor = shadingValues.Kd * max(dot(pointToLight, surfaceNormal), 0.0f);
     color4 diffuseIntensity = GLState::light_diffuse * color4(
             shadingValues.color.x * factor,
             shadingValues.color.y * factor,
@@ -248,9 +248,9 @@ color4 calculateIllumination(Object::IntersectionValues intersectionValue, vec4 
     diffuseIntensity.limit();
 
     // Specular light intensity
-    vec3 reflexionDirection = 2 * dot(surfaceNormal, pointToLight) * surfaceNormal - pointToLight;
-    vec3 pointToObserver = -vec3(dir.x, dir.y, dir.z);
-    factor = shadingValues.Ks * pow(dot(reflexionDirection, pointToObserver), 1);
+    vec3 reflexionDirection = normalize(-reflect(pointToLight, surfaceNormal));
+    vec3 pointToObserver = normalize(-vec3(dir.x, dir.y, dir.z));
+    factor = shadingValues.Ks * pow(max(dot(pointToObserver, reflexionDirection), 0.0f), shadingValues.Kn);
 
     color4 specularIntensity = GLState::light_specular * color4(
             shadingValues.color.x * factor,
@@ -344,11 +344,11 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
         }
     }
 
+    // Lighting and shadows
     double factor = 1;
     if (id != -1) {
         if (pointIsInShadow(intersectionValuesVector[id].P)) {
             factor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
-//            factor = 0;
         }
         color = factor * calculateIllumination(intersectionValuesVector[id], dir);
         color.w = 1.0;
@@ -488,9 +488,9 @@ void initCornellBox() {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.75), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
-        _shadingValues.Ka = 0.1;
-        _shadingValues.Kd = 0.9;
-        _shadingValues.Ks = 0.0;
+        _shadingValues.Ka = 0.2;
+        _shadingValues.Kd = 1.0;
+        _shadingValues.Ks = 1.0;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 1.0;
         _shadingValues.Kr = 1.4; // TODO: 1.4 > 1.0, la valeur est-elle juste ? N'est-elle pas censée être sur la Mirrored Sphere ?
@@ -499,12 +499,12 @@ void initCornellBox() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored Sphere", vec3(-1.0, -0.5, -1.0), 0.75));
+        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -0.5, -1.0), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
-        _shadingValues.Ka = 0.1;
-        _shadingValues.Kd = 0.0;
-        _shadingValues.Ks = 0.9;
+        _shadingValues.Ka = 0.2;
+        _shadingValues.Kd = 1.0;
+        _shadingValues.Ks = 1.0;
         _shadingValues.Kn = 16.0;
         _shadingValues.Kt = 0.0;
         _shadingValues.Kr = 0.0;
@@ -813,7 +813,6 @@ void drawObject(Object *object, GLuint vao, GLuint buffer) {
     glUniformMatrix4fv(GLState::ModelView, 1, GL_TRUE, objectModelView);
 
     glDrawArrays(GL_TRIANGLES, 0, object->mesh.vertices.size());
-
 }
 
 
