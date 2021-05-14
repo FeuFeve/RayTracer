@@ -428,7 +428,7 @@ struct vec4 {
     operator GLfloat* ()
 	{ return static_cast<GLfloat*>( &x ); }
 
-    void limit() {
+    vec4 limit() {
         if (x < 0) x = 0;
         else if (x > 1) x = 1;
         if (y < 0) y = 0;
@@ -437,6 +437,7 @@ struct vec4 {
         else if (z > 1) z = 1;
         if (w < 0) w = 0;
         else if (w > 1) w = 1;
+        return *this;
     }
 };
 
