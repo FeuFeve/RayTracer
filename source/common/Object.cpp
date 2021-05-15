@@ -74,7 +74,7 @@ Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     if (result.t != std::numeric_limits<double>::infinity()) {
         result.P = p0 + result.t * V;
         result.P2 = 0;
-        result.N = normal;
+        result.N = vec4(normal, 0);
     }
     return result;
 }

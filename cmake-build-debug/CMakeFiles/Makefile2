@@ -178,9 +178,9 @@ CMakeFiles/glad.dir/clean:
 # Target rules for target CMakeFiles/raytracer.dir
 
 # All Build rule for target.
-CMakeFiles/raytracer.dir/all: CMakeFiles/glad.dir/all
-CMakeFiles/raytracer.dir/all: glfw-3.2/src/CMakeFiles/glfw.dir/all
 CMakeFiles/raytracer.dir/all: pngdecode/CMakeFiles/pngdecode.dir/all
+CMakeFiles/raytracer.dir/all: glfw-3.2/src/CMakeFiles/glfw.dir/all
+CMakeFiles/raytracer.dir/all: CMakeFiles/glad.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\raytracer.dir\build.make CMakeFiles/raytracer.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\raytracer.dir\build.make CMakeFiles/raytracer.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="C:\Users\FeuFeve\CLionProjects\Master\S2 - Programmation 3D\raytracer-template\cmake-build-debug\CMakeFiles" --progress-num=25,26,27,28,29,30 "Built target raytracer"
@@ -234,8 +234,8 @@ glfw-3.2/src/CMakeFiles/glfw.dir/clean:
 # Target rules for target pngdecode/CMakeFiles/pngdecode.dir
 
 # All Build rule for target.
-pngdecode/CMakeFiles/pngdecode.dir/all: CMakeFiles/glad.dir/all
 pngdecode/CMakeFiles/pngdecode.dir/all: glfw-3.2/src/CMakeFiles/glfw.dir/all
+pngdecode/CMakeFiles/pngdecode.dir/all: CMakeFiles/glad.dir/all
 	$(MAKE) $(MAKESILENT) -f pngdecode\CMakeFiles\pngdecode.dir\build.make pngdecode/CMakeFiles/pngdecode.dir/depend
 	$(MAKE) $(MAKESILENT) -f pngdecode\CMakeFiles\pngdecode.dir\build.make pngdecode/CMakeFiles/pngdecode.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="C:\Users\FeuFeve\CLionProjects\Master\S2 - Programmation 3D\raytracer-template\cmake-build-debug\CMakeFiles" --progress-num=18,19,20,21,22,23,24 "Built target pngdecode"
