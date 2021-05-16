@@ -15,13 +15,9 @@ using namespace std;
 /* -------------------------------------------------------------------------- */
 Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
-//    vec2 t1t2 = raySphereIntersection(p0, V);
     result.t = raySphereIntersection(p0, V);
-//    result.t = t1t2.x;
-//    result.t2 = t1t2.y;
     if (result.t != std::numeric_limits<double>::infinity()) {
         result.P = p0 + (result.t * V);
-//        result.P2 = p0 + (t1t2.y * V);
         result.N = normalize(result.P - center);
     }
     return result;
@@ -48,27 +44,17 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
 
     if (delta < 0) // No intersection, let t be infinity() and return it
         return std::numeric_limits<double>::infinity();
-//        return t1t2;
 
     if (delta == 0) // Only 1 intersection
         return (-b) / (2*a);
-//        t1t2.x = (-b) / (2*a);
 
-// Two intersections, keep the positive minimum between s1 and s2
+    // Two intersections, keep the positive minimum between s1 and s2
     double s1 = (-b - sqrt(delta)) / (2*a);
     double s2 = (-b + sqrt(delta)) / (2*a);
-    if (s1 < 0) {
+    if (s1 < 0)
         return s2;
-//        t1t2.x = s2;
-//        t1t2.y = s1;
-    }
-    else {
+    else
         return s1;
-//        t1t2.x = std::min(s1, s2);
-//        t1t2.y = std::max(s1, s2);
-    }
-
-//    return t1t2;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -76,10 +62,8 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
 Object::IntersectionValues Square::intersect(vec4 p0, vec4 V) {
     IntersectionValues result;
     result.t = raySquareIntersection(p0, V);
-//    result.t2 = std::numeric_limits<double>::infinity();
     if (result.t != std::numeric_limits<double>::infinity()) {
         result.P = p0 + result.t * V;
-//        result.P2 = 0;
         result.N = vec4(normal, 0);
     }
     return result;

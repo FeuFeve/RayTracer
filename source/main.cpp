@@ -260,29 +260,29 @@ color4 calculateIllumination(const Object::IntersectionValues& intersectionValue
 // the ray arrived to the light source, then the light from the light source is blocked by an object
 // If the light is blocked return true, else return false
 bool pointIsInShadow(const vec4 &point, const vec4 &lightPos = lightPosition) {
-    vec4 pointToLight = lightPos - point;
+    vec4 pointToLight = lightPos - point; pointToLight.w = 0;
+
+    vec4 pointToLightNormalized = normalize(pointToLight); pointToLightNormalized.w = 0;
+    vec4 epsilonPoint = point + EPSILON * pointToLightNormalized; epsilonPoint.w = 1;
+
+    vec4 epsilonPointToLight = lightPos - epsilonPoint; epsilonPointToLight.w = 0;
+    vec4 epsilonPointToLightNormalized = normalize(epsilonPointToLight); epsilonPointToLightNormalized.w = 0;
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
-        intersectionValuesVector.push_back(sceneObjects[i]->intersect(point, pointToLight));
+        intersectionValuesVector.push_back(sceneObjects[i]->intersect(epsilonPoint, epsilonPointToLightNormalized));
         intersectionValuesVector[intersectionValuesVector.size() - 1].ID_ = i;
     }
 
     for (auto &intersectionValues : intersectionValuesVector) {
-        double lengthFromPointToLight = length(pointToLight);
+        double lengthFromEpsilonPointToLight = length(epsilonPointToLight);
 
         if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t >= 0) {
-            vec4 pointToP = intersectionValues.P - point;
-            double lengthFromPointToP = length(pointToP);
-            if (lengthFromPointToP > EPSILON && lengthFromPointToP < lengthFromPointToLight)
+            vec4 epsilonPointToP = intersectionValues.P - epsilonPoint;
+            double lengthFromEpsilonPointToP = length(epsilonPointToP);
+            if (lengthFromEpsilonPointToP > 0 && lengthFromEpsilonPointToP < lengthFromEpsilonPointToLight)
                 return true;
         }
-//        if (intersectionValues.t2 != std::numeric_limits<double>::infinity() && intersectionValues.t2 >= 0) {
-//            vec4 pointToP2 = intersectionValues.P2 - point;
-//            double lengthFromPointToP2 = length(pointToP2);
-//            if (lengthFromPointToP2 > EPSILON && lengthFromPointToP2 < lengthFromPointToLight)
-//                return true;
-//        }
     }
 
     return false;
@@ -298,10 +298,15 @@ double factorPointIsInShadow(const vec4 &point, double maxLightSize, int iterati
     srand(ns);
 
     double total = 0;
-    double halfMaxLightSize = maxLightSize / 2;
+    int steps = 10;
+    double maxStepSize = maxLightSize / (2 * steps);
     for (int i = 0; i < iterations; i++) {
-        double x = lightPosition.x + randomDouble(-halfMaxLightSize, halfMaxLightSize);
-        double z = lightPosition.z + randomDouble(-halfMaxLightSize, halfMaxLightSize);
+        double x = lightPosition.x;
+        double z = lightPosition.z;
+        for (int j = 0; j < steps; j++) {
+            x += randomDouble(-maxStepSize, +maxStepSize);
+            z += randomDouble(-maxStepSize, +maxStepSize);
+        }
         if (!pointIsInShadow(point, vec4(x, lightPosition.y, z, lightPosition.w)))
             total++;
     }
@@ -340,18 +345,23 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     }
 
     // Lighting and shadows
-    double factor = 1;
+    Object::ShadingValues shVal = sceneObjects[id]->shadingValues;
+
+    double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P, 1, 10);
+    double ambientFactor = shVal.Ka + (1 - shVal.Ka) * shadowFactor;
+    if (shadowFactor < 1)
+        ambientFactor = 0;
+
 //    if (id != -1) {
 ////        if (pointIsInShadow(intersectionValuesVector[id].P)) {
-////            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
+////            shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
 ////        }
-//        color = factor * calculateIllumination(intersectionValuesVector[id], dir);
+//        color = shadowFactor * calculateIllumination(intersectionValuesVector[id], dir);
 //        color.w = 1.0;
 //    }
 
-    Object::ShadingValues shVal = sceneObjects[id]->shadingValues;
     if (depth == maxDepth or shVal.Ks == 0) { // If non-mirror object or maxDepth, return the object's color
-        color = factor * calculateIllumination(intersectionValuesVector[id], dir);
+        color = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
     }
     else { // Else, mix the objects color with the refracted object's color
         vec4 objectColor = (1 - shVal.Ks) * calculateIllumination(intersectionValuesVector[id], dir);
@@ -363,7 +373,7 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 
         vec4 refractedObjectColor = shVal.Ks * castRay(newP0, newDir, lastHitObject, depth + 1);
 
-        color = factor * (objectColor + refractedObjectColor);
+        color = ambientFactor * (objectColor + refractedObjectColor);
     }
 
     color.w = 1.0;
@@ -421,7 +431,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(0.5, 1.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -522,7 +532,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
