@@ -12,9 +12,11 @@
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
+#include <iomanip>
 
 using namespace Angel;
 using namespace std;
+using namespace std::chrono;
 
 typedef vec4 color4;
 typedef vec4 point4;
@@ -211,12 +213,12 @@ void castRayDebug(vec4 p0, vec4 dir) {
 
     for (unsigned int i = 0; i < intersections.size(); i++) {
         if (intersections[i].t != std::numeric_limits<double>::infinity()) {
-            std::cout << "Hit " << intersections[i].name << " " << intersections[i].ID_ << "\n";
-            std::cout << "P: " << intersections[i].P << "\n";
-            std::cout << "N: " << intersections[i].N << "\n";
+            std::cout << "Hit " << intersections[i].name << " " << intersections[i].ID_ << endl;
+            std::cout << "P: " << intersections[i].P << endl;
+            std::cout << "N: " << intersections[i].N << endl;
             vec4 L = lightPosition - intersections[i].P;
             L = normalize(L);
-            std::cout << "L: " << L << "\n";
+            std::cout << "L: " << L << endl;
         }
     }
 
@@ -292,7 +294,6 @@ double randomDouble(double min, double max) {
 }
 
 double factorPointIsInShadow(const vec4 &point, double maxLightSize, int iterations) {
-    using namespace std::chrono;
     uint64_t ns = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     srand(ns);
 
@@ -604,8 +605,16 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
             scene = _BOX;
         }
     }
-    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        auto start = high_resolution_clock::now();
         rayTrace();
+        auto end = high_resolution_clock::now();
+        double time_taken = duration_cast<nanoseconds>(end - start).count();
+        time_taken *= 1e-9;
+
+        cout << "Time taken by program is : " << fixed << time_taken << setprecision(9);
+        cout << " sec" << endl;
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -631,8 +640,8 @@ static void mouseClick(GLFWwindow *window, int button, int action, int mods) {
     GLState::beginx = xpos;
     GLState::beginy = ypos;
 
-    std::vector<vec4> ray_o_dir = findRay(xpos, ypos);
-    castRayDebug(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0));
+//    std::vector<vec4> ray_o_dir = findRay(xpos, ypos);
+//    castRayDebug(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0));
 
 }
 
@@ -789,7 +798,6 @@ void drawObject(Object *object, GLuint vao, GLuint buffer) {
     float material_shininess = object->shadingValues.Kn;
 
     color4 ambient_product = GLState::light_ambient * material_ambient;
-    cerr << ambient_product << endl;
     color4 diffuse_product = GLState::light_diffuse * material_diffuse;
     color4 specular_product = GLState::light_specular * material_specular;
 
