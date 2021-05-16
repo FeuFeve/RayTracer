@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
-#include <iomanip>
+#include <Chrono.h>
 
 using namespace Angel;
 using namespace std;
@@ -31,6 +31,10 @@ std::vector<Object *> sceneObjects;
 point4 lightPosition;
 color4 lightColor;
 point4 cameraPosition;
+
+vector<point4> lightPoints;
+double lightSize = 1;
+int nbPoints = 10;
 
 //Recursion depth for raytracer
 int maxDepth = 3;
@@ -293,25 +297,32 @@ double randomDouble(double min, double max) {
     return min + d * (max - min);
 }
 
-double factorPointIsInShadow(const vec4 &point, double maxLightSize, int iterations) {
+void generateLightPoints() {
+    lightPoints.clear();
+
     uint64_t ns = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     srand(ns);
 
-    double total = 0;
-    int steps = 10;
-    double maxStepSize = maxLightSize / (2 * steps);
-    for (int i = 0; i < iterations; i++) {
+    int steps = 5;
+    double maxStepSize = lightSize / (2 * steps);
+
+    for (int i = 0; i < nbPoints; i++) {
         double x = lightPosition.x;
         double z = lightPosition.z;
         for (int j = 0; j < steps; j++) {
             x += randomDouble(-maxStepSize, +maxStepSize);
             z += randomDouble(-maxStepSize, +maxStepSize);
         }
-        if (!pointIsInShadow(point, vec4(x, lightPosition.y, z, lightPosition.w)))
-            total++;
+        lightPoints.emplace_back(x, lightPosition.y, z, lightPosition.w);
     }
+}
 
-    return total / iterations;
+double factorPointIsInShadow(const vec4 &point) {
+    double total = 0;
+    for (point4 &lightPoint : lightPoints)
+        if (!pointIsInShadow(point, lightPoint))
+            total++;
+    return total / lightPoints.size();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -347,18 +358,8 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     // Lighting and shadows
     Object::ShadingValues shVal = sceneObjects[id]->shadingValues;
 
-    double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P, 1, 10);
+    double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P);
     double ambientFactor = shVal.Ka + (1 - shVal.Ka) * shadowFactor;
-    if (shadowFactor < 1)
-        ambientFactor = 0;
-
-//    if (id != -1) {
-////        if (pointIsInShadow(intersectionValuesVector[id].P)) {
-////            shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
-////        }
-//        color = shadowFactor * calculateIllumination(intersectionValuesVector[id], dir);
-//        color.w = 1.0;
-//    }
 
     if (depth == maxDepth or shVal.Ks == 0) { // If non-mirror object or maxDepth, return the object's color
         color = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
@@ -385,6 +386,7 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace() {
     auto *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
+    generateLightPoints();
 
     for (unsigned int i = 0; i < GLState::window_width; i++) {
         for (unsigned int j = 0; j < GLState::window_height; j++) {
@@ -634,14 +636,9 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
         }
     }
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        auto start = high_resolution_clock::now();
+        Chrono chrono;
         rayTrace();
-        auto end = high_resolution_clock::now();
-        double time_taken = duration_cast<nanoseconds>(end - start).count();
-        time_taken *= 1e-9;
-
-        cout << "Time taken by program is : " << fixed << time_taken << setprecision(9);
-        cout << " sec" << endl;
+        chrono.stop("Render time");
     }
 }
 

@@ -68,6 +68,7 @@ CMakeFiles/raytracer.dir/source/main.cpp.obj: ../pngdecode/pngenc.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../pngdecode/zenc.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../pngdecode/zss.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../source/common/CheckError.h
+CMakeFiles/raytracer.dir/source/main.cpp.obj: ../source/common/Chrono.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../source/common/ObjMesh.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../source/common/Object.h
 CMakeFiles/raytracer.dir/source/main.cpp.obj: ../source/common/SourcePath.h
