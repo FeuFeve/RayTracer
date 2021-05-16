@@ -33,8 +33,8 @@ color4 lightColor;
 point4 cameraPosition;
 
 vector<point4> lightPoints;
-double lightSize = 1;
-int nbPoints = 10;
+double lightSize = 0.5;
+int nbPoints = 50;
 
 //Recursion depth for raytracer
 int maxDepth = 3;
@@ -228,6 +228,16 @@ void castRayDebug(vec4 p0, vec4 dir) {
 
 }
 
+color4 calculateAmbientColor(const Object::IntersectionValues& intersectionValue) {
+    Object::ShadingValues shVal = sceneObjects[intersectionValue.ID_]->shadingValues;
+
+    // Ambient light intensity
+    color4 ambientMaterial = shVal.color * shVal.Ka; ambientMaterial.w = 1;
+    color4 ambient = GLState::light_ambient * ambientMaterial; ambient.w = 1;
+
+    return ambient;
+}
+
 color4 calculateIllumination(const Object::IntersectionValues& intersectionValue, const vec4& dir) {
 
     vec4 P = intersectionValue.P; P.w = 1;
@@ -303,7 +313,7 @@ void generateLightPoints() {
     uint64_t ns = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     srand(ns);
 
-    int steps = 5;
+    int steps = 2;
     double maxStepSize = lightSize / (2 * steps);
 
     for (int i = 0; i < nbPoints; i++) {
@@ -325,14 +335,31 @@ double factorPointIsInShadow(const vec4 &point) {
     return total / lightPoints.size();
 }
 
+static color4 maxColor(const color4& color1, const color4& color2) {
+    if (color1.x > color2.x) return color1;
+    if (color1.x < color2.x) return color2;
+    if (color1.y > color2.y) return color1;
+    if (color1.y < color2.y) return color2;
+    if (color1.z > color2.z) return color1;
+    if (color1.z < color2.z) return color2;
+    if (color1.w > color2.w) return color1;
+    if (color1.w < color2.w) return color2;
+    return color1; // Same colors
+}
+
+static color4 interpolate(const color4& color1, const color4& color2, double factor) {
+    if (maxColor(color1, color2) == color1)
+        return color1;
+
+    return (1 - factor) * color1 + factor * color2;
+}
+
 /* -------------------------------------------------------------------------- */
 /* ----------  cast Ray = p0 + t*dir and intersect with sphere      --------- */
 /* ----------  return color, right now shading is approx based      --------- */
 /* ----------  depth                                                --------- */
 vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
-    vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
-
-    if (depth > maxDepth) return color; // TODO: remove and put it bellow
+    color4 color = vec4(0.0, 0.0, 0.0, 0.0);
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
@@ -357,24 +384,31 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 
     // Lighting and shadows
     Object::ShadingValues shVal = sceneObjects[id]->shadingValues;
+    color4 ambientColor = calculateAmbientColor(intersectionValuesVector[id]);
+    color4 phongColor = calculateIllumination(intersectionValuesVector[id], dir);
 
     double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P);
-    double ambientFactor = shVal.Ka + (1 - shVal.Ka) * shadowFactor;
+//    double ambientFactor = shVal.Ka + (1 - shVal.Ka) * shadowFactor;
 
     if (depth == maxDepth or shVal.Ks == 0) { // If non-mirror object or maxDepth, return the object's color
-        color = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
+        color = interpolate(ambientColor, phongColor, shadowFactor);
+//        color = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
+//        color = maxColor(color, calculateAmbientColor(intersectionValuesVector[id]));
     }
     else { // Else, mix the objects color with the refracted object's color
-        vec4 objectColor = (1 - shVal.Ks) * calculateIllumination(intersectionValuesVector[id], dir);
+//        vec4 objectColor = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
+//        objectColor = maxColor(objectColor, calculateAmbientColor(intersectionValuesVector[id]));
+        color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
+        objectColor *= (1 - shVal.Ks);
 
         lastHitObject = sceneObjects[id];
         Object::IntersectionValues iVal = intersectionValuesVector[id];
         vec4 newP0 = iVal.P;
         vec4 newDir = normalize(reflect(dir, iVal.N));
 
-        vec4 refractedObjectColor = shVal.Ks * castRay(newP0, newDir, lastHitObject, depth + 1);
+        color4 refractedObjectColor = shVal.Ks * castRay(newP0, newDir, lastHitObject, depth + 1);
 
-        color = ambientFactor * (objectColor + refractedObjectColor);
+        color = objectColor + refractedObjectColor;
     }
 
     color.w = 1.0;
@@ -385,24 +419,53 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
 /* ------------  Ray trace our scene.  Output color to image and    --------- */
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace() {
+    auto* chrono = new Chrono("Render time");
+    cout << "Starting the rendering..." << endl;
+
     auto *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
     generateLightPoints();
+
+    double findRayDuration = 0;
+    double castRayDuration = 0;
+
+    double currentPx = 0;
+    double totalPx = GLState::window_width * GLState::window_height;
+    double currentProgressionPercentage = 0;
+    double printEveryPercentage = 5;
 
     for (unsigned int i = 0; i < GLState::window_width; i++) {
         for (unsigned int j = 0; j < GLState::window_height; j++) {
             unsigned int idx = j * GLState::window_width + i;
+            auto* chrono1 = new Chrono("findRay");
             std::vector<vec4> ray_o_dir = findRay(i, j);
+            findRayDuration += chrono1->stop()->getDuration();
 
+            auto* chrono2 = new Chrono("castRay");
             vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
+            castRayDuration += chrono2->stop()->getDuration();
             buffer[4 * idx] = color.x * 255;
             buffer[4 * idx + 1] = color.y * 255;
             buffer[4 * idx + 2] = color.z * 255;
             buffer[4 * idx + 3] = color.w * 255;
+
+            currentPx++;
+            if ((currentPx / totalPx) * 100 >= currentProgressionPercentage + printEveryPercentage) {
+                currentProgressionPercentage += printEveryPercentage;
+                cout << round(currentProgressionPercentage) << "%" << endl;
+            }
         }
     }
 
+    Chrono::printDuration("All findRays: ", findRayDuration);
+    Chrono::printDuration("All castRays: ", castRayDuration);
+
+    auto* writeChrono = new Chrono("Write image");
     write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);
     delete[] buffer;
+    writeChrono->stop()->display();
+
+    cout << "Rendering ended." << endl;
+    chrono->stop()->display();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -422,7 +485,7 @@ void initCornellBox() {
 
     float ka = 0.1;
     float kd = 0.9;
-    float ks = 0.0;
+    float ks = 0.5;
     float kn = 16.0;
     float kt = 0.0;
     float kr = 0.0;
@@ -636,9 +699,7 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
         }
     }
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        Chrono chrono;
         rayTrace();
-        chrono.stop("Render time");
     }
 }
 

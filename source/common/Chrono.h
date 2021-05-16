@@ -8,6 +8,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <utility>
 
 using namespace std;
 using namespace chrono;
@@ -16,22 +17,37 @@ using namespace chrono;
 class Chrono {
 
 private:
+    string name;
     high_resolution_clock::time_point start;
     high_resolution_clock::time_point end;
+    double duration;
 
 public:
-    Chrono() {
+    explicit Chrono(const string& name) {
+        this->name = name;
         start = high_resolution_clock::now();
+//        cout << "# " << name << " started." << endl;
     };
 
     ~Chrono() = default;
 
-    void stop(const string& message) {
+    Chrono* stop() {
         end = high_resolution_clock::now();
-        double time_taken = duration_cast<nanoseconds>(end - start).count();
-        time_taken *= 1e-9;
+        duration = duration_cast<nanoseconds>(end - start).count();
+        duration *= 1e-9;
+        return this;
+    }
 
-        cout << message << ": " << fixed << time_taken << setprecision(9) << "s" << endl;
+    void display() {
+        printDuration(name + " ended: ", duration);
+    }
+
+    double getDuration() const {
+        return duration;
+    }
+
+    static void printDuration(const string& message, double duration) {
+        cout << message << fixed << duration << setprecision(9) << "s" << endl;
     }
 };
 
