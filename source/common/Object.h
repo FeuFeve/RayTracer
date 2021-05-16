@@ -22,19 +22,19 @@ public:
 
     typedef struct{
         vec4 color;
+        float Ka; // Coefficient de réflexion ambiante de l'objet
         float Kd; // Coefficient de réflexion diffuse de l'objet
         float Ks; // Coefficient de réflexion spéculaire de l'objet
         float Kn; // Brillance du matériaux
-        float Kt; // Transparence du matériaux (?)
-        float Ka; // Coefficient de réflexion ambiante de l'objet
-        float Kr; // Réflectivité du matériaux (?)
+        float Kt; // Transparence du matériaux
+        float Kr; // Coefficient de réfraction du matériaux (ex: verre = 1.48 à 1.54)
     } ShadingValues;
 
     typedef struct{
         double t;
-        double t2;
+//        double t2;
         vec4 P;
-        vec4 P2;
+//        vec4 P2;
         vec4 N;
         int ID_;
         std::string name;
@@ -83,7 +83,7 @@ public:
     virtual IntersectionValues intersect(vec4 p0, vec4 V);
     
 private:
-    vec2 raySphereIntersection(const vec4& p0, const vec4& V);
+    double raySphereIntersection(const vec4& p0, const vec4& V);
     vec3 center;
     double radius;
 };

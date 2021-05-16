@@ -277,12 +277,12 @@ bool pointIsInShadow(const vec4 &point, const vec4 &lightPos = lightPosition) {
             if (lengthFromPointToP > EPSILON && lengthFromPointToP < lengthFromPointToLight)
                 return true;
         }
-        if (intersectionValues.t2 != std::numeric_limits<double>::infinity() && intersectionValues.t2 >= 0) {
-            vec4 pointToP2 = intersectionValues.P2 - point;
-            double lengthFromPointToP2 = length(pointToP2);
-            if (lengthFromPointToP2 > EPSILON && lengthFromPointToP2 < lengthFromPointToLight)
-                return true;
-        }
+//        if (intersectionValues.t2 != std::numeric_limits<double>::infinity() && intersectionValues.t2 >= 0) {
+//            vec4 pointToP2 = intersectionValues.P2 - point;
+//            double lengthFromPointToP2 = length(pointToP2);
+//            if (lengthFromPointToP2 > EPSILON && lengthFromPointToP2 < lengthFromPointToLight)
+//                return true;
+//        }
     }
 
     return false;
@@ -316,7 +316,7 @@ double factorPointIsInShadow(const vec4 &point, double maxLightSize, int iterati
 vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
 
-    if (depth > maxDepth) return color;
+    if (depth > maxDepth) return color; // TODO: remove and put it bellow
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
@@ -328,21 +328,45 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     int id = -1;
     for (auto &intersectionValues : intersectionValuesVector) {
         if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t < min) {
-            min = intersectionValues.t;
-            id = intersectionValues.ID_;
+            if (depth == 0 or intersectionValues.t > EPSILON) {
+                min = intersectionValues.t;
+                id = intersectionValues.ID_;
+            }
         }
+    }
+
+    if (id == -1) { // No object hit
+        return color;
     }
 
     // Lighting and shadows
     double factor = 1;
-    if (id != -1) {
-//        if (pointIsInShadow(intersectionValuesVector[id].P)) {
-//            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
-//        }
+//    if (id != -1) {
+////        if (pointIsInShadow(intersectionValuesVector[id].P)) {
+////            factor = factorPointIsInShadow(intersectionValuesVector[id].P, 3, 1000);
+////        }
+//        color = factor * calculateIllumination(intersectionValuesVector[id], dir);
+//        color.w = 1.0;
+//    }
+
+    Object::ShadingValues shVal = sceneObjects[id]->shadingValues;
+    if (depth == maxDepth or shVal.Ks == 0) { // If non-mirror object or maxDepth, return the object's color
         color = factor * calculateIllumination(intersectionValuesVector[id], dir);
-        color.w = 1.0;
+    }
+    else { // Else, mix the objects color with the refracted object's color
+        vec4 objectColor = (1 - shVal.Ks) * calculateIllumination(intersectionValuesVector[id], dir);
+
+        lastHitObject = sceneObjects[id];
+        Object::IntersectionValues iVal = intersectionValuesVector[id];
+        vec4 newP0 = iVal.P;
+        vec4 newDir = normalize(reflect(dir, iVal.N));
+
+        vec4 refractedObjectColor = shVal.Ks * castRay(newP0, newDir, lastHitObject, depth + 1);
+
+        color = factor * (objectColor + refractedObjectColor);
     }
 
+    color.w = 1.0;
     return color;
 }
 
@@ -385,8 +409,8 @@ void initCornellBox() {
     sceneObjects.clear();
 
     float ka = 0.1;
-    float kd = 1.0;
-    float ks = 1.0;
+    float kd = 0.9;
+    float ks = 0.0;
     float kn = 16.0;
     float kt = 0.0;
     float kr = 0.0;
@@ -397,7 +421,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(0.5, 1.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -486,14 +510,8 @@ void initCornellBox() {
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 0.0f;
-        _shadingValues.Kr = kr + 0.0f;
-//        _shadingValues.Ka = 0.1;
-//        _shadingValues.Kd = 0.7;
-//        _shadingValues.Ks = 0.8;
-//        _shadingValues.Kn = 16.0;
-//        _shadingValues.Kt = 0.0; // 1.0
-//        _shadingValues.Kr = 0.0; // 1.4 // TODO: 1.4 > 1.0, la valeur est-elle juste ? N'est-elle pas censée être sur la Mirrored Sphere ?
+        _shadingValues.Kt = kt + 1.0f;
+        _shadingValues.Kr = kr + 1.5f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
@@ -504,7 +522,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
