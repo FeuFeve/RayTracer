@@ -150,7 +150,7 @@ measured in millimetres, and [framebuffer size](@ref window_fbsize), which is
 measured in pixels.
 
 Pixels and screen coordinates may map 1:1 on your machine, but they won't on
-every other machine, for example on a Mac with a Retina display.  The ratio
+every other machine, for example on a Mac with a Retina displayCurrentDuration.  The ratio
 between screen coordinates and pixels may also change at run-time depending on
 which monitor the window is currently considered to be on.
 

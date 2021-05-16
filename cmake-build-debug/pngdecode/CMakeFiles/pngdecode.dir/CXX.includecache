@@ -6,22 +6,6 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.cpp
-./png.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
-stdlib.h
--
-stdexcept
--
-limits.h
--
-string.h
--
-stdio.h
--
-errno.h
--
-
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/png.h
 
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/pngdecode/pngdec.cpp

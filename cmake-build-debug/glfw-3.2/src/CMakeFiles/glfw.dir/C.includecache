@@ -76,57 +76,11 @@ C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/g
 nsgl_context.h
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/nsgl_context.h
 
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/context.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-assert.h
--
-stdio.h
--
-string.h
--
-limits.h
--
-stdio.h
--
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/egl_context.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-stdio.h
--
-stdlib.h
--
-assert.h
--
-
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/egl_context.h
 EGL/eglplatform.h
 -
 
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/glx_context.h
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/init.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-string.h
--
-stdlib.h
--
-stdio.h
--
-stdarg.h
--
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/input.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-assert.h
--
-float.h
--
-stdlib.h
--
 
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
 glfw_config.h
@@ -194,59 +148,9 @@ C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/g
 pthread.h
 -
 
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/vulkan.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-assert.h
--
-string.h
--
-stdlib.h
--
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/wgl_context.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-stdlib.h
--
-malloc.h
--
-assert.h
--
-
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/wgl_context.h
 
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_init.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-stdlib.h
--
-malloc.h
--
-initguid.h
--
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_joystick.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-math.h
--
-initguid.h
--
-
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_joystick.h
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_monitor.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-stdlib.h
--
-string.h
--
-limits.h
--
-malloc.h
--
 
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_platform.h
 wctype.h
@@ -269,42 +173,6 @@ wgl_context.h
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/wgl_context.h
 egl_context.h
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/egl_context.h
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_time.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_tls.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/win32_window.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-limits.h
--
-stdlib.h
--
-malloc.h
--
-string.h
--
-windowsx.h
--
-shellapi.h
--
-
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/window.c
-internal.h
-C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/internal.h
-assert.h
--
-string.h
--
-stdlib.h
--
-float.h
--
 
 C:/Users/FeuFeve/CLionProjects/Master/S2 - Programmation 3D/raytracer-template/glfw-3.2/src/wl_platform.h
 wayland-client.h

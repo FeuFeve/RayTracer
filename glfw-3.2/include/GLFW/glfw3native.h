@@ -138,7 +138,7 @@ GLFWAPI const char* glfwGetWin32Adapter(GLFWmonitor* monitor);
 
 /*! @brief Returns the display device name of the specified monitor.
  *
- *  @return The UTF-8 encoded display device name (for example
+ *  @return The UTF-8 encoded displayCurrentDuration device name (for example
  *  `\\.\DISPLAY1\Monitor0`) of the specified monitor, or `NULL` if an
  *  [error](@ref error_handling) occurred.
  *

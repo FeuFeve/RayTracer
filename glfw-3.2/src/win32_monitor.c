@@ -33,7 +33,7 @@
 #include <malloc.h>
 
 
-// Create monitor from an adapter and (optionally) a display
+// Create monitor from an adapter and (optionally) a displayCurrentDuration
 //
 static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
                                    DISPLAY_DEVICEW* display)

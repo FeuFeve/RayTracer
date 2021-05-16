@@ -1442,7 +1442,7 @@ GLFWAPI void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
 
 /*! @brief Returns the physical size of the monitor.
  *
- *  This function returns the size, in millimetres, of the display area of the
+ *  This function returns the size, in millimetres, of the displayCurrentDuration area of the
  *  specified monitor.
  *
  *  Some systems do not provide accurate monitor size information, either
@@ -1455,9 +1455,9 @@ GLFWAPI void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
  *
  *  @param[in] monitor The monitor to query.
  *  @param[out] widthMM Where to store the width, in millimetres, of the
- *  monitor's display area, or `NULL`.
+ *  monitor's displayCurrentDuration area, or `NULL`.
  *  @param[out] heightMM Where to store the height, in millimetres, of the
- *  monitor's display area, or `NULL`.
+ *  monitor's displayCurrentDuration area, or `NULL`.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
  *

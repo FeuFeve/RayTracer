@@ -425,8 +425,10 @@ void rayTrace() {
     auto *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
     generateLightPoints();
 
-    double findRayDuration = 0;
-    double castRayDuration = 0;
+    auto* findRayChrono = new Chrono("findRay total time");
+    findRayChrono->pause();
+    auto* castRayChrono = new Chrono("castRay total time");
+    castRayChrono->pause();
 
     double currentPx = 0;
     double totalPx = GLState::window_width * GLState::window_height;
@@ -436,13 +438,13 @@ void rayTrace() {
     for (unsigned int i = 0; i < GLState::window_width; i++) {
         for (unsigned int j = 0; j < GLState::window_height; j++) {
             unsigned int idx = j * GLState::window_width + i;
-            auto* chrono1 = new Chrono("findRay");
+            findRayChrono->unpause();
             std::vector<vec4> ray_o_dir = findRay(i, j);
-            findRayDuration += chrono1->stop()->getDuration();
+            findRayChrono->pause();
 
-            auto* chrono2 = new Chrono("castRay");
+            castRayChrono->unpause();
             vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0);
-            castRayDuration += chrono2->stop()->getDuration();
+            castRayChrono->pause();
             buffer[4 * idx] = color.x * 255;
             buffer[4 * idx + 1] = color.y * 255;
             buffer[4 * idx + 2] = color.z * 255;
@@ -451,21 +453,22 @@ void rayTrace() {
             currentPx++;
             if ((currentPx / totalPx) * 100 >= currentProgressionPercentage + printEveryPercentage) {
                 currentProgressionPercentage += printEveryPercentage;
-                cout << round(currentProgressionPercentage) << "%" << endl;
+                cout << round(currentProgressionPercentage) << "% (ETR = " << round(
+                        chrono->getETR(currentProgressionPercentage)) << "s)" << endl;
             }
         }
     }
 
-    Chrono::printDuration("All findRays: ", findRayDuration);
-    Chrono::printDuration("All castRays: ", castRayDuration);
+    findRayChrono->displayCurrentDuration();
+    castRayChrono->displayCurrentDuration();
 
     auto* writeChrono = new Chrono("Write image");
     write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);
     delete[] buffer;
-    writeChrono->stop()->display();
+    writeChrono->displayCurrentDuration();
 
     cout << "Rendering ended." << endl;
-    chrono->stop()->display();
+    chrono->displayCurrentDuration();
 }
 
 /* -------------------------------------------------------------------------- */

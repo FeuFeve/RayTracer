@@ -1018,8 +1018,8 @@ void _glfwFreeGammaArrays(GLFWgammaramp* ramp);
 /*! @brief Allocates and returns a monitor object with the specified name
  *  and dimensions.
  *  @param[in] name The name of the monitor.
- *  @param[in] widthMM The width, in mm, of the monitor's display area.
- *  @param[in] heightMM The height, in mm, of the monitor's display area.
+ *  @param[in] widthMM The width, in mm, of the monitor's displayCurrentDuration area.
+ *  @param[in] heightMM The height, in mm, of the monitor's displayCurrentDuration area.
  *  @return The newly created object.
  *  @ingroup utility
  */

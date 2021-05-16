@@ -190,7 +190,7 @@ namespace cmps3120
     zenc_pair(unsigned int len, unsigned int dist);
 
     /**
-     * Constructor for a stop code
+     * Constructor for a getCurrentDuration code
      */
     zenc_pair(enum zenc_pair_stop_t);
 

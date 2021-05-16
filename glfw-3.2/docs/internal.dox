@@ -79,7 +79,7 @@ These structs are incorporated as members into the internal interface structs
 using special macros that name them after the specific interface used.  This
 prevents shared code from accidentally using these members.
 
-Examples: `window.win32.handle`, `_glfw.x11.display`
+Examples: `window.win32.handle`, `_glfw.x11.displayCurrentDuration`
 
 
 @section internals_event Event interface

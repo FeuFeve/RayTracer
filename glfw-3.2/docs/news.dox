@@ -200,7 +200,7 @@ selected on Linux with a CMake option.
 
 @subsection news_31_mir (Experimental) Mir support
 
-GLFW now has an _experimental_ Mir display server backend that can be selected
+GLFW now has an _experimental_ Mir displayCurrentDuration server backend that can be selected
 on Linux with a CMake option.
 
 

@@ -972,7 +972,7 @@ rendering buffers; a front buffer and a back buffer.  The front buffer is
 the one being displayed and the back buffer the one you render to.
 
 When the entire frame has been rendered, it is time to swap the back and the
-front buffers in order to display what has been rendered and begin rendering
+front buffers in order to displayCurrentDuration what has been rendered and begin rendering
 a new frame.  This is done with @ref glfwSwapBuffers.
 
 @code

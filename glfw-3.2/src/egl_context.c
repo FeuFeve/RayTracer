@@ -55,7 +55,7 @@ static const char* getErrorString(EGLint error)
         case EGL_BAD_CURRENT_SURFACE:
             return "The current surface of the calling thread is a window, pixel buffer or pixmap that is no longer valid";
         case EGL_BAD_DISPLAY:
-            return "An EGLDisplay argument does not name a valid EGL display connection";
+            return "An EGLDisplay argument does not name a valid EGL displayCurrentDuration connection";
         case EGL_BAD_SURFACE:
             return "An EGLSurface argument does not name a valid surface configured for GL rendering";
         case EGL_BAD_MATCH:
@@ -248,7 +248,7 @@ static GLFWglproc getProcAddress(const char* procname)
 static void destroyContext(_GLFWwindow* window)
 {
 #if defined(_GLFW_X11)
-    // NOTE: Do not unload libGL.so.1 while the X11 display is still open,
+    // NOTE: Do not unload libGL.so.1 while the X11 displayCurrentDuration is still open,
     //       as it will make XCloseDisplay segfault
     if (window->context.client != GLFW_OPENGL_API)
 #endif // _GLFW_X11
@@ -343,7 +343,7 @@ GLFWbool _glfwInitEGL(void)
     if (_glfw.egl.display == EGL_NO_DISPLAY)
     {
         _glfwInputError(GLFW_API_UNAVAILABLE,
-                        "EGL: Failed to get EGL display: %s",
+                        "EGL: Failed to get EGL displayCurrentDuration: %s",
                         getErrorString(eglGetError()));
 
         _glfwTerminateEGL();
@@ -651,7 +651,7 @@ GLFWbool _glfwChooseVisualEGL(const _GLFWctxconfig* ctxconfig,
     desired.screen = _glfw.x11.screen;
     desired.visualid = visualID;
 
-    result = XGetVisualInfo(_glfw.x11.display, vimask, &desired, &count);
+    result = XGetVisualInfo(_glfw.x11.displayCurrentDuration, vimask, &desired, &count);
     if (!result)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
