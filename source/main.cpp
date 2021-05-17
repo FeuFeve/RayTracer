@@ -388,16 +388,11 @@ vec4 castRay(vec4 p0, vec4 dir, Object *lastHitObject, int depth) {
     color4 phongColor = calculateIllumination(intersectionValuesVector[id], dir);
 
     double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P);
-//    double ambientFactor = shVal.Ka + (1 - shVal.Ka) * shadowFactor;
 
     if (depth == maxDepth or shVal.Ks == 0) { // If non-mirror object or maxDepth, return the object's color
         color = interpolate(ambientColor, phongColor, shadowFactor);
-//        color = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
-//        color = maxColor(color, calculateAmbientColor(intersectionValuesVector[id]));
     }
     else { // Else, mix the objects color with the refracted object's color
-//        vec4 objectColor = ambientFactor * calculateIllumination(intersectionValuesVector[id], dir);
-//        objectColor = maxColor(objectColor, calculateAmbientColor(intersectionValuesVector[id]));
         color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
         objectColor *= (1 - shVal.Ks);
 
