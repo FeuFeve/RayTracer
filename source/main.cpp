@@ -385,6 +385,9 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
     if (id == -1) { // No object hit
         return color;
     }
+    if (sceneObjects[id]->name.find("Light", 0) == 0) { // Hit light
+        return sceneObjects[id]->shadingValues.color;
+    }
 
     // Lighting and shadows
     bool exitingObject = false;
@@ -514,7 +517,7 @@ static void error_callback(int error, const char *description) {
 void initCornellBox() {
     cameraPosition = point4(0.0, 0.0, 6.0, 1.0);
     lightPosition = point4(0.0, 1.5, 0.0, 1.0);
-    lightColor = color4(1.0, 1.0, 1.0, 1.0);
+    lightColor = color4(1.0, 0.95, 0.85, 1.0);
 
     sceneObjects.clear();
 
@@ -524,6 +527,20 @@ void initCornellBox() {
     float kn = 16.0;
     float kt = 0.0;
     float kr = 1.0; // Refraction coef. ALWAYS >= 1
+
+    { // Light
+        sceneObjects.push_back(new Square("Light", RotateX(90) * Translate(0.0, 0.0, -1.99) * Scale(lightSize, lightSize, 1.0)));
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = lightColor;
+        _shadingValues.Ka = ka + 0.0f;
+        _shadingValues.Kd = kd + 0.0f;
+        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Kn = kn + 0.0f;
+        _shadingValues.Kt = kt + 0.0f;
+        _shadingValues.Kr = kr + 0.0f;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
 
     { //Back Wall
         sceneObjects.push_back(new Square("Back Wall", Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
