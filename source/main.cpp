@@ -33,13 +33,14 @@ color4 lightColor;
 point4 cameraPosition;
 
 vector<point4> lightPoints;
-double lightSize = 0.5;
-int nbPoints = 50;
+double lightSize = 0.01;
+int nbPoints = 1;
 
 //Recursion depth for raytracer
-int maxDepth = 3;
+int maxDepth = 5;
 
 void initGL();
+vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, float currentKr, bool debug);
 
 namespace GLState {
     int window_width, window_height;
@@ -329,6 +330,30 @@ static color4 interpolate(const color4& color1, const color4& color2, double fac
     return (1 - factor) * color1 + factor * color2;
 }
 
+color4 getRefractedColor(const vec4& dir, const vec4& normal, const point4& newP0, const Object::ShadingValues& shVal,
+                         color4 objectColor, Object *lastHitObject, float currentKr, int depth, bool exitingObject, bool debug) {
+    objectColor *= (1 - shVal.Kt);
+
+    vec4 refractedNormal = normal;
+    float newKr = shVal.Kr;
+    if (exitingObject) {
+        newKr = 1.0f;
+        refractedNormal = -refractedNormal;
+    }
+
+    vec4 refractedRay = refract(dir, refractedNormal, currentKr, newKr);
+    if (debug) {
+        cout << "Transparency = " << shVal.Kt << ", current coef. = " << currentKr << ", refraction coef. = " << newKr << endl;
+        cout << "Incident ray = " << dir << endl;
+        cout << "Surface normal = " << refractedNormal << endl;
+        cout << "Refracted ray = " << refractedRay << endl;
+    }
+
+    color4 refractedObjectColor = shVal.Kt * castRay(newP0, refractedRay, lastHitObject, depth + 1, newKr, debug);
+
+    return objectColor + refractedObjectColor;
+}
+
 /* -------------------------------------------------------------------------- */
 /* ----------  cast Ray = p0 + t*dir and intersect with sphere      --------- */
 /* ----------  return color, right now shading is approx based      --------- */
@@ -373,53 +398,37 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
     color4 ambientColor = calculateAmbientColor(intersectionValuesVector[id]);
     color4 phongColor = calculateIllumination(intersectionValuesVector[id], dir);
 
-    double shadowFactor = 1; //factorPointIsInShadow(intersectionValuesVector[id].P);
+    double shadowFactor = factorPointIsInShadow(intersectionValuesVector[id].P);
+    color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
 
     if (depth == maxDepth) {
-        color = interpolate(ambientColor, phongColor, shadowFactor);
+        color = objectColor;
     }
-    else if (shVal.Ks == 0) { // If non-mirror object
-        if (shVal.Kt == 0) { // If non-transparent object
-            color = interpolate(ambientColor, phongColor, shadowFactor);
-        }
-        else {
-            color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
-            objectColor *= (1 - shVal.Kt);
+    else {
+        point4 newP0 = iVal.P;
+        vec4 normal = iVal.N;
 
-            point4 newP0 = iVal.P;
-            vec4 normal = iVal.N;
-            float newKr = shVal.Kr;
-            if (exitingObject) {
-                newKr = 1.0f;
-                normal = -normal;
+        if (shVal.Ks == 0) { // Non-mirror object
+            if (shVal.Kt == 0) { // Non-transparent AND non-transparent object
+                color = objectColor;
             }
-
-            vec4 refractedRay = refract(dir, normal, currentKr, newKr);
-            if (debug) {
-                cout << "Transparency = " << shVal.Kt << ", current coef. = " << currentKr << ", refraction coef. = " << newKr << endl;
-                cout << "Incident ray = " << dir << endl;
-                cout << "Surface normal = " << normal << endl;
-                cout << "Refracted ray = " << refractedRay << endl;
+            else { // Non-mirror but transparent object
+                color = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth, exitingObject, debug);
             }
-
-            color4 refractedObjectColor = shVal.Kt * castRay(newP0, refractedRay, lastHitObject, depth + 1, newKr, debug);
-
-            color = objectColor + refractedObjectColor;
         }
-    }
-    else { // Else, mix the objects color with the refracted object's color
-        cerr << "ERROR" << endl;
-//        color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
-//        objectColor *= (1 - shVal.Ks);
-//
-//        lastHitObject = sceneObjects[id];
-//        Object::IntersectionValues iVal = intersectionValuesVector[id];
-//        vec4 newP0 = iVal.P;
-//        vec4 newDir = normalize(reflect(dir, iVal.N));
-//
-//        color4 reflectedObjetColor = shVal.Ks * castRay(newP0, newDir, lastHitObject, depth + 1);
-//
-//        color = objectColor + reflectedObjetColor;
+        else { // Mirror object
+            if (shVal.Kt != 0) { // Mirror AND transparent object
+                objectColor = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth, exitingObject, debug);
+            }
+//            color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
+            objectColor *= (1 - shVal.Ks);
+
+            vec4 reflectedRay = normalize(reflect(dir, iVal.N));
+
+            color4 reflectedObjetColor = shVal.Ks * castRay(newP0, reflectedRay, lastHitObject, depth + 1, currentKr, debug);
+
+            color = objectColor + reflectedObjetColor;
+        }
     }
 
     color.w = 1.0;
@@ -622,6 +631,20 @@ void initCornellBox() {
 
 
     {
+        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -0.5, -1.0), 0.75));
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
+        _shadingValues.Ka = ka + 0.0f;
+        _shadingValues.Kd = kd + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Kn = kn + 0.0f;
+        _shadingValues.Kt = kt + 0.0f;
+        _shadingValues.Kr = kr + 0.0f;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
+
+    {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
@@ -636,9 +659,9 @@ void initCornellBox() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -0.5, -1.0), 0.75));
+        sceneObjects.push_back(new Sphere("Normal sphere", vec3(1, -1, -1), 0.5));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
+        _shadingValues.color = vec4(0.9, 0.6, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.0f;
