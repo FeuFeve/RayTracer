@@ -33,8 +33,8 @@ color4 lightColor;
 point4 cameraPosition;
 
 vector<point4> lightPoints;
-double lightSize = 0.01;
-int nbPoints = 1;
+double lightSize = 0.5;
+int nbPoints = 50;
 
 //Recursion depth for raytracer
 int maxDepth = 5;
@@ -249,7 +249,7 @@ color4 calculateIllumination(const Object::IntersectionValues& intersectionValue
 // Cast a ray to the light source in the scene, if the ray intersects an object and the intersection occurs before
 // the ray arrived to the light source, then the light from the light source is blocked by an object
 // If the light is blocked return true, else return false
-bool pointIsInShadow(const vec4 &point, const vec4 &lightPos = lightPosition) {
+float shadowFactorTransparency(const vec4 &point, const vec4 &lightPos = lightPosition) {
     vec4 pointToLight = lightPos - point; pointToLight.w = 0;
 
     vec4 pointToLightNormalized = normalize(pointToLight); pointToLightNormalized.w = 0;
@@ -264,18 +264,21 @@ bool pointIsInShadow(const vec4 &point, const vec4 &lightPos = lightPosition) {
         intersectionValuesVector[intersectionValuesVector.size() - 1].ID_ = i;
     }
 
+    float coef = 1;
     for (auto &intersectionValues : intersectionValuesVector) {
         double lengthFromEpsilonPointToLight = length(epsilonPointToLight);
 
         if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t >= 0) {
             vec4 epsilonPointToP = intersectionValues.P - epsilonPoint;
             double lengthFromEpsilonPointToP = length(epsilonPointToP);
-            if (lengthFromEpsilonPointToP > 0 && lengthFromEpsilonPointToP < lengthFromEpsilonPointToLight)
-                return true;
+            if (lengthFromEpsilonPointToP > 0 && lengthFromEpsilonPointToP < lengthFromEpsilonPointToLight) { // Point is in shadow
+                Object::ShadingValues shVal = sceneObjects[intersectionValues.ID_]->shadingValues;
+                coef *= 0.9f * shVal.Kt;
+            }
         }
     }
 
-    return false;
+    return coef;
 }
 
 double randomDouble(double min, double max) {
@@ -303,11 +306,10 @@ void generateLightPoints() {
     }
 }
 
-double factorPointIsInShadow(const vec4 &point) {
-    double total = 0;
+float factorPointIsInShadow(const vec4 &point) {
+    float total = 0;
     for (point4 &lightPoint : lightPoints)
-        if (!pointIsInShadow(point, lightPoint))
-            total++;
+        total += shadowFactorTransparency(point, lightPoint);
     return total / lightPoints.size();
 }
 
@@ -549,7 +551,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(0.5, 1.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 0.9f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -606,7 +608,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(1.0, 0.5, 0.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 0.5f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -631,7 +633,7 @@ void initCornellBox() {
 
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -0.5, -1.0), 0.75));
+        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -0.5, -1.0), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
@@ -645,29 +647,29 @@ void initCornellBox() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
+        sceneObjects.push_back(new Sphere("Mirror sphere 2", vec3(1, 1.25, -1), 0.5));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
+        _shadingValues.color = vec4(0.9, 0.6, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 0.75f;
         _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 1.0f;
-        _shadingValues.Kr = kr + 0.5f;
+        _shadingValues.Kt = kt + 0.0f;
+        _shadingValues.Kr = kr + 0.0f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
 
     {
-        sceneObjects.push_back(new Sphere("Normal sphere", vec3(1, -1, -1), 0.5));
+        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.9, 0.6, 0.1, 1.0);
+        _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 0.1f;
         _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 0.0f;
-        _shadingValues.Kr = kr + 0.0f;
+        _shadingValues.Kt = kt + 0.9f;
+        _shadingValues.Kr = kr + 0.5f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
