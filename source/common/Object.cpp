@@ -51,10 +51,15 @@ double Sphere::raySphereIntersection(const vec4& p0, const vec4& V) {
     // Two intersections, keep the positive minimum between s1 and s2
     double s1 = (-b - sqrt(delta)) / (2*a);
     double s2 = (-b + sqrt(delta)) / (2*a);
-    if (s1 < 0)
+
+    if (s1 < EPSILON && s2 < EPSILON)
+        return std::numeric_limits<double>::infinity();
+    else if (s1 < EPSILON)
         return s2;
-    else
+    else if (s2 < EPSILON)
         return s1;
+    else
+        return min(s1, s2);
 }
 
 /* -------------------------------------------------------------------------- */

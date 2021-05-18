@@ -9,6 +9,8 @@
 
 #include "common.h"
 
+using namespace std;
+
 namespace Angel {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -528,8 +530,23 @@ namespace Angel {
         float c = dot(-nNorm, inNorm);
 
         vec4 refractedRay = r * inNorm + (r * c - sqrt(1 - pow(r, 2) * (1 - pow(c, 2)))) * nNorm;
-        refractedRay = normalize(refractedRay); refractedRay.w = 0;
+        refractedRay = normalize(refractedRay);
+        refractedRay.w = 0;
         return refractedRay;
+    }
+
+    inline vec4 refract2(const vec4 &normal, const vec4 &incident, double n1, double n2) {
+        const double n = n1 / n2;
+        const double cosI = -dot(normal, incident);
+        const double sinT2 = n * n * (1.0 - cosI * cosI);
+
+        if (sinT2 > 1.0) {
+            cerr << "Invalid vector refraction" << endl;
+            return incident; // TIR
+        }
+
+        const double cosT = sqrt(1.0 - sinT2);
+        return n * incident + (n * cosI - cosT) * normal;
     }
 
 //----------------------------------------------------------------------------
