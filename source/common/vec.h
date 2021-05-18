@@ -520,8 +520,8 @@ namespace Angel {
 
     // in = input vector
     // n = hit object's normal
-    // n1 = refracting indice of the material "in" is in
-    // n2 = refracting indice of the material "in" has hit
+    // n1 = refracting index of the material "in" is in
+    // n2 = refracting index of the material "in" has hit
     inline vec4 refract(const vec4 &in, const vec4 &n, float n1, float n2) {
         vec4 inNorm = normalize(in);
         vec4 nNorm = normalize(n);

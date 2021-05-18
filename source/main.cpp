@@ -334,24 +334,26 @@ static color4 interpolate(const color4& color1, const color4& color2, double fac
 
 color4 getRefractedColor(const vec4& dir, const vec4& normal, const point4& newP0, const Object::ShadingValues& shVal,
                          color4 objectColor, Object *lastHitObject, float currentKr, int depth, bool exitingObject, bool debug) {
-    objectColor *= (1 - shVal.Kt);
-
-    vec4 refractedNormal = normal;
     float newKr = shVal.Kr;
+    float transparency = shVal.Kt;
+    vec4 refractedNormal = normal;
     if (exitingObject) {
         newKr = 1.0f;
+        transparency = 1;
         refractedNormal = -refractedNormal;
     }
 
+    objectColor *= (1 - transparency);
+
     vec4 refractedRay = refract(dir, refractedNormal, currentKr, newKr);
     if (debug) {
-        cout << "Transparency = " << shVal.Kt << ", current coef. = " << currentKr << ", refraction coef. = " << newKr << endl;
+        cout << "Transparency = " << transparency << ", current coef. = " << currentKr << ", refraction coef. = " << newKr << endl;
         cout << "Incident ray = " << dir << endl;
         cout << "Surface normal = " << refractedNormal << endl;
         cout << "Refracted ray = " << refractedRay << endl;
     }
 
-    color4 refractedObjectColor = shVal.Kt * castRay(newP0, refractedRay, lastHitObject, depth + 1, newKr, debug);
+    color4 refractedObjectColor = transparency * castRay(newP0, refractedRay, lastHitObject, depth + 1, newKr, debug);
 
     return objectColor + refractedObjectColor;
 }
@@ -422,7 +424,6 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
             if (shVal.Kt != 0) { // Mirror AND transparent object
                 objectColor = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth, exitingObject, debug);
             }
-//            color4 objectColor = interpolate(ambientColor, phongColor, shadowFactor);
             objectColor *= (1 - shVal.Ks);
 
             vec4 reflectedRay = normalize(reflect(dir, iVal.N));
@@ -434,7 +435,6 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
     }
 
     color.w = 1.0;
-//    cout << "Color = " << color << endl;
     return color;
 }
 
@@ -442,29 +442,9 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
 /* ---------  Some debugging code: cast Ray = p0 + t*dir  ------------------- */
 /* ---------  and print out what it hits =                ------------------- */
 void castRayDebug(const vec4& p0, const vec4& dir) {
-
     cout << "### DEBUG START ###" << endl;
     castRay(p0, dir, nullptr, 0, 1.0f, true);
     cout << "# DEBUG END #" << endl << endl << endl << endl << endl << endl;
-
-//    std::vector<Object::IntersectionValues> intersections;
-//
-//    for (unsigned int i = 0; i < sceneObjects.size(); i++) {
-//        intersections.push_back(sceneObjects[i]->intersect(p0, dir));
-//        intersections[intersections.size() - 1].ID_ = i;
-//    }
-//
-//    for (unsigned int i = 0; i < intersections.size(); i++) {
-//        if (intersections[i].t != std::numeric_limits<double>::infinity()) {
-//            std::cout << "Hit " << intersections[i].name << " " << intersections[i].ID_ << endl;
-//            std::cout << "P: " << intersections[i].P << endl;
-//            std::cout << "N: " << intersections[i].N << endl;
-//            vec4 L = lightPosition - intersections[i].P;
-//            L = normalize(L);
-//            std::cout << "L: " << L << endl;
-//        }
-//    }
-
 }
 
 /* -------------------------------------------------------------------------- */
@@ -548,10 +528,10 @@ void initCornellBox() {
     { //Back Wall
         sceneObjects.push_back(new Square("Back Wall", Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.5, 1.0, 1.0, 1.0);
+        _shadingValues.color = vec4(0.9, 0.9, 0.9, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.9f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -577,7 +557,7 @@ void initCornellBox() {
         sceneObjects.push_back(
                 new Square("Right Wall", RotateY(-90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.5, 0.0, 0.5, 1.0);
+        _shadingValues.color = vec4(0.0, 0.0, 0.8, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.0f;
@@ -591,7 +571,7 @@ void initCornellBox() {
     { //Floor
         sceneObjects.push_back(new Square("Floor", RotateX(-90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.3, 1.0, 0.3, 1.0);
+        _shadingValues.color = vec4(0.9, 0.9, 0.9, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.0f;
@@ -605,10 +585,10 @@ void initCornellBox() {
     { //Ceiling
         sceneObjects.push_back(new Square("Ceiling", RotateX(90) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0.5, 0.0, 1.0);
+        _shadingValues.color = vec4(0.9, 0.9, 0.9, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.5f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -620,7 +600,7 @@ void initCornellBox() {
         sceneObjects.push_back(
                 new Square("Front Wall", RotateY(180) * Translate(0.0, 0.0, -2.0) * Scale(2.0, 2.0, 1.0)));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.2, 0.2, 1.0, 1.0);
+        _shadingValues.color = vec4(0.1, 0.1, 0.1, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.0f;
@@ -633,9 +613,9 @@ void initCornellBox() {
 
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -0.5, -1.0), 0.75));
+        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -1, -0.5),0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.1, 0.5, 0.1, 1.0);
+        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 1.0f;
@@ -647,28 +627,14 @@ void initCornellBox() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Mirror sphere 2", vec3(1, 1.25, -1), 0.5));
+        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5),0.75));
         Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0.9, 0.6, 0.1, 1.0);
-        _shadingValues.Ka = ka + 0.0f;
-        _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.75f;
-        _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 0.0f;
-        _shadingValues.Kr = kr + 0.0f;
-        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-    }
-
-    {
-        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
-        Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0.5, 0.5, 1.0);
+        _shadingValues.color = vec4(1.0, 0.0, 0.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
         _shadingValues.Ks = ks + 0.1f;
         _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 0.9f;
+        _shadingValues.Kt = kt + 1.0f;
         _shadingValues.Kr = kr + 0.5f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
@@ -1020,6 +986,8 @@ int main(void) {
         case _BOX:
             initCornellBox();
             break;
+        default:
+            initCornellBox();
     }
 
     initGL();
