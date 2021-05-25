@@ -629,19 +629,19 @@ void initCornellBox() {
     }
 
 
-    {
-        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -1, -0.5),0.75));
-        Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
-        _shadingValues.Ka = ka + 0.0f;
-        _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 1.0f;
-        _shadingValues.Kn = kn + 0.0f;
-        _shadingValues.Kt = kt + 0.0f;
-        _shadingValues.Kr = kr + 0.0f;
-        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-    }
+//    {
+//        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -1, -0.5),0.75));
+//        Object::ShadingValues _shadingValues;
+//        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+//        _shadingValues.Ka = ka + 0.0f;
+//        _shadingValues.Kd = kd + 0.0f;
+//        _shadingValues.Ks = ks + 1.0f;
+//        _shadingValues.Kn = kn + 0.0f;
+//        _shadingValues.Kt = kt + 0.0f;
+//        _shadingValues.Kr = kr + 0.0f;
+//        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+//        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+//    }
 
     {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5),0.75));
@@ -653,6 +653,25 @@ void initCornellBox() {
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 1.0f;
         _shadingValues.Kr = kr + 0.5f;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
+
+    {
+        const char *path = "Objects/mirrored_sphere.obj";
+        auto* meshObject1 = new MeshObject("Mesh object 1", path);
+
+//        meshObject1->setModelView(Translate(0.5, 0.5, 0) * Scale(2, 2, 2));
+
+        sceneObjects.push_back(meshObject1);
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = vec4(1.0, 0.0, 1.0, 1.0);
+        _shadingValues.Ka = ka + 0.0f;
+        _shadingValues.Kd = kd + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Kn = kn + 0.0f;
+        _shadingValues.Kt = kt + 0.0f;
+        _shadingValues.Kr = kr + 0.0f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }

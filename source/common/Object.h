@@ -19,6 +19,7 @@ public:
 
     friend class Sphere;
     friend class Square;
+    friend class MeshObject;
 
     typedef struct{
         vec4 color;
@@ -32,9 +33,7 @@ public:
 
     typedef struct{
         double t;
-//        double t2;
         vec4 P;
-//        vec4 P2;
         vec4 N;
         int ID_;
         std::string name;
@@ -130,4 +129,21 @@ private:
     vec4 point;
     vec3 normal;
 };
+
+class MeshObject : public Object {
+public:
+    MeshObject(string name, const char* path) : Object(move(name)) {
+        mesh.loadOBJ(path);
+    }
+
+//    MeshObject(string name, const char* path, const vec3& center, float scale) : Object(move(name)) {
+//        mesh.loadOBJ(path, center, scale);
+//    }
+
+    virtual IntersectionValues intersect(vec4 p0, vec4 V);
+
+private:
+    void rayMeshObjectIntersection(const vec4 &p0, const vec4 &V, IntersectionValues *result);
+};
+
 #endif /* defined(__OBJECT_H__) */

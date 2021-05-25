@@ -8,6 +8,8 @@
 #include <cmath>
 
 #include "common.h"
+#include "Object.h"
+
 
 using namespace std;
 
@@ -108,4 +110,14 @@ double Square::raySquareIntersection(const vec4& p0, const vec4& V) {
         }
     }
     return std::numeric_limits<double>::infinity();
+}
+
+Object::IntersectionValues MeshObject::intersect(vec4 p0, vec4 V) {
+    IntersectionValues result;
+    rayMeshObjectIntersection(p0, V, &result);
+    return result;
+}
+
+void MeshObject::rayMeshObjectIntersection(const vec4& p0, const vec4& V, IntersectionValues *result) {
+
 }

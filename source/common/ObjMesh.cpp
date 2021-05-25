@@ -6,6 +6,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "common.h"
+#include "ObjMesh.h"
+
 
 bool Mesh::loadOBJ(const char * path){
     std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
@@ -132,8 +134,10 @@ bool Mesh::loadOBJ(const char * path){
     //    std::cout << "Total " << normals.size() << " normals\n";
 
 
+//    cout << "BEFORE: center = " << center << ", scale = " << scale << endl;
     center = box_min+(box_max-box_min)/2.0;
     scale = (std::max)(box_max.x - box_min.x, box_max.y-box_min.y);
+//    cout << "AFTER: center = " << center << ", scale = " << scale << endl;
 
     model_view = Scale(1.0/scale,           //Make the extents 0-1
                        1.0/scale,
@@ -143,6 +147,12 @@ bool Mesh::loadOBJ(const char * path){
 
     return true;
 }
+
+//bool Mesh::loadOBJ(const char *path, const vec3& objCenter, float objScale) {
+//    center = objCenter;
+//    scale = objScale;
+//    return loadOBJ(path);
+//}
 
 bool Mesh::makeSubdivisionSphere(int steps, vec3 center, double radius){
 
