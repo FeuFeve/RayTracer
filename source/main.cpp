@@ -337,10 +337,14 @@ color4 getRefractedColor(const vec4& dir, const vec4& normal, const point4& newP
     float newKr = shVal.Kr;
     float transparency = shVal.Kt;
     vec4 refractedNormal = normal;
+    if (dot(dir, normal) > 0)
+        refractedNormal = -normal;
+//    cout << "dot 1 = " << dot(dir, normal) << endl;
+//    cout << "dot 2 = " << dot(dir, -normal) << endl;
     if (exitingObject) {
         newKr = 1.0f;
         transparency = 1;
-        refractedNormal = -refractedNormal;
+//        refractedNormal = -refractedNormal;
     }
 
     objectColor *= (1 - transparency);
@@ -385,6 +389,10 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
     if (id == -1) { // No object hit
         return color;
     }
+    if (debug) {
+        cout << "-----" << endl;
+        cout << "Hit: '" << sceneObjects[id]->name << "' at " << intersectionValuesVector[id].P << endl;
+    }
     if (sceneObjects[id]->name.find("Light", 0) == 0) { // Hit light
         return sceneObjects[id]->shadingValues.color;
     }
@@ -397,10 +405,6 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
     lastHitObject = sceneObjects[id];
     Object::ShadingValues shVal = lastHitObject->shadingValues;
     Object::IntersectionValues iVal = intersectionValuesVector[id];
-    if (debug) {
-        cout << "-----" << endl;
-        cout << "Hit: " << lastHitObject->name << " at " << iVal.P << endl;
-    }
 
     color4 ambientColor = calculateAmbientColor(intersectionValuesVector[id]);
     color4 phongColor = calculateIllumination(intersectionValuesVector[id], dir);
@@ -456,6 +460,7 @@ void castRayDebug(const vec4& p0, const vec4& dir) {
 void rayTrace() {
     auto* chrono = new Chrono("Render time");
     cout << "Starting the rendering..." << endl;
+    Object::triangleTests = 0;
 
     auto *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
     generateLightPoints();
@@ -502,6 +507,7 @@ void rayTrace() {
     delete[] buffer;
     writeChrono->displayCurrentDuration();
 
+    cout << "Number of ray/triangle intersection done: " << Object::triangleTests << endl;
     cout << "Rendering ended." << endl;
     chrono->displayCurrentDuration();
 }
@@ -661,7 +667,7 @@ void initCornellBoxBasic() {
         _shadingValues.color = vec4(1.0, 0.0, 0.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.1f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 1.0f;
         _shadingValues.Kr = kr + 0.5f;
@@ -683,10 +689,9 @@ void initCornellBoxPolygon() {
     float kr = 1.0; // Refraction coef. ALWAYS >= 1
 
     {
-        const char *path = "Objects/mirrored_sphere.obj";
-        auto* meshObject1 = new MeshObject("Mesh object 1", path);
-
-//        meshObject1->setModelView(Translate(0.5, 0.5, 0) * Scale(2, 2, 2));
+        const char *path = "Objects/sphere1.obj";
+        auto* meshObject1 = new MeshObject("Mesh mirrored sphere", path,
+                                           Translate(-0.5, 0.5, -0.5) * Scale(0.8, 0.8, 0.8));
 
         sceneObjects.push_back(meshObject1);
         Object::ShadingValues _shadingValues;
@@ -697,6 +702,24 @@ void initCornellBoxPolygon() {
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
+
+    {
+        const char *path = "Objects/sphere1.obj";
+        auto* meshObject1 = new MeshObject("Mesh glass sphere", path,
+                                           Translate(2.0, -0.5, 1.0) * Scale(1.1, 1.1, 1.1));
+
+        sceneObjects.push_back(meshObject1);
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = vec4(0.0, 1.0, 1.0, 1.0);
+        _shadingValues.Ka = ka + 0.0f;
+        _shadingValues.Kd = kd + 0.0f;
+        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Kn = kn + 0.0f;
+        _shadingValues.Kt = kt + 1.0f;
+        _shadingValues.Kr = kr + 0.5f;
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }

@@ -13,6 +13,8 @@
 
 using namespace std;
 
+int Object::triangleTests = 0;
+
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 Object::IntersectionValues Sphere::intersect(vec4 p0, vec4 V) {
@@ -176,6 +178,7 @@ void MeshObject::rayMeshObjectIntersection(const vec4& p0, const vec4& V, Inters
         vec3 v2 = vec3(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
         vec3 n2 = vec3(mesh.normals[i + 2].x, mesh.normals[i + 2].y, mesh.normals[i + 2].z);
 
+        triangleTests++;
         rayTriangleIntersection(origin, ray, v0, v1, v2, n0, n1, n2, result);
     }
 }

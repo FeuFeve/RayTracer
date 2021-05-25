@@ -15,6 +15,8 @@
 class Object{
 public:
 
+    static int triangleTests;
+
     std::string name;
 
     friend class Sphere;
@@ -132,8 +134,13 @@ private:
 
 class MeshObject : public Object {
 public:
-    MeshObject(string name, const char* path) : Object(move(name)) {
+    MeshObject(string name, const char* path, mat4 transform = mat4()) : Object(move(name)) {
         mesh.loadOBJ(path);
+
+        for (auto & vertex : mesh.vertices) {
+            vertex = transform * vertex;
+            vertex.w = 1;
+        }
     }
 
 //    MeshObject(string name, const char* path, const vec3& center, float scale) : Object(move(name)) {
