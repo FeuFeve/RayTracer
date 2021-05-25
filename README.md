@@ -1,4 +1,4 @@
-# Programmation 3D - TP4 (Système solaire sous OpenGL)
+# Programmation 3D - Projet de Raytracing
 
 
 #### Auteur : Clément POTIN, M1 IMAGINA
