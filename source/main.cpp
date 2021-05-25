@@ -24,9 +24,9 @@ typedef vec4 point4;
 
 //Scene variables
 enum {
-    _SPHERE, _SQUARE, _BOX
+    CORNELL_BOX_BASIC, CORNELL_BOX_POLYGON
 };
-int scene = _SPHERE; //Simple sphere, square or cornell box
+int scene = CORNELL_BOX_BASIC; //Simple sphere, square or cornell box
 std::vector<Object *> sceneObjects;
 point4 lightPosition;
 color4 lightColor;
@@ -627,21 +627,33 @@ void initCornellBox() {
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
+}
 
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+void initCornellBoxBasic() {
+    initCornellBox();
 
-//    {
-//        sceneObjects.push_back(new Sphere("Mirrored sphere 1", vec3(-1.0, -1, -0.5),0.75));
-//        Object::ShadingValues _shadingValues;
-//        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
-//        _shadingValues.Ka = ka + 0.0f;
-//        _shadingValues.Kd = kd + 0.0f;
-//        _shadingValues.Ks = ks + 1.0f;
-//        _shadingValues.Kn = kn + 0.0f;
-//        _shadingValues.Kt = kt + 0.0f;
-//        _shadingValues.Kr = kr + 0.0f;
-//        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-//        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-//    }
+    float ka = 0.1;
+    float kd = 0.9;
+    float ks = 0.0;
+    float kn = 16.0;
+    float kt = 0.0;
+    float kr = 1.0; // Refraction coef. ALWAYS >= 1
+
+    {
+        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -1, -0.5),0.75));
+        Object::ShadingValues _shadingValues;
+        _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
+        _shadingValues.Ka = ka + 0.0f;
+        _shadingValues.Kd = kd + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Kn = kn + 0.0f;
+        _shadingValues.Kt = kt + 0.0f;
+        _shadingValues.Kr = kr + 0.0f;
+        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
+        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
+    }
 
     {
         sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5),0.75));
@@ -656,6 +668,19 @@ void initCornellBox() {
         sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
         sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+void initCornellBoxPolygon() {
+    initCornellBox();
+
+    float ka = 0.1;
+    float kd = 0.9;
+    float ks = 0.0;
+    float kn = 16.0;
+    float kt = 0.0;
+    float kr = 1.0; // Refraction coef. ALWAYS >= 1
 
     {
         const char *path = "Objects/mirrored_sphere.obj";
@@ -668,7 +693,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(1.0, 0.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 0.0f;
+        _shadingValues.Ks = ks + 1.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;
@@ -680,93 +705,23 @@ void initCornellBox() {
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
-void initUnitSphere() {
-    cameraPosition = point4(0.0, 0.0, 3.0, 1.0);
-    lightPosition = point4(0.0, 0.0, 4.0, 1.0);
-    lightColor = color4(1.0, 1.0, 1.0, 1.0);
-
-    sceneObjects.clear();
-
-    {
-        sceneObjects.push_back(new Sphere("Diffuse sphere", vec3(1.0, 0.0, 0.0)));
-        Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0, 0, 1.0);
-        _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 1.0;
-        _shadingValues.Ks = 0.0;
-        _shadingValues.Kn = 16.0;
-        _shadingValues.Kt = 0.0;
-        _shadingValues.Kr = 0.0;
-        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-    }
-
-    {
-        sceneObjects.push_back(new Sphere("Diffuse sphere 2", vec3(-1.0, 0.0, 0.0)));
-        Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(0, 1, 0, 1.0);
-        _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 1.0;
-        _shadingValues.Ks = 0.0;
-        _shadingValues.Kn = 16.0;
-        _shadingValues.Kt = 0.0;
-        _shadingValues.Kr = 0.0;
-        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-    }
-
-}
-
-/* -------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------- */
-void initUnitSquare() {
-    cameraPosition = point4(0.0, 0.0, 3.0, 1.0);
-    lightPosition = point4(0.0, 0.0, 4.0, 1.0);
-    lightColor = color4(1.0, 1.0, 1.0, 1.0);
-
-    sceneObjects.clear();
-
-    { //Back Wall
-        sceneObjects.push_back(new Square("Unit Square"));
-        Object::ShadingValues _shadingValues;
-        _shadingValues.color = vec4(1.0, 0, 0, 1.0);
-        _shadingValues.Ka = 0.0;
-        _shadingValues.Kd = 1.0;
-        _shadingValues.Ks = 0.0;
-        _shadingValues.Kn = 16.0;
-        _shadingValues.Kt = 0.0;
-        _shadingValues.Kr = 0.0;
-        sceneObjects[sceneObjects.size() - 1]->setShadingValues(_shadingValues);
-        sceneObjects[sceneObjects.size() - 1]->setModelView(mat4());
-    }
-
-}
-
-
-/* -------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------- */
 static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+
     if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        if (scene != _SPHERE) {
-            initUnitSphere();
+        if (scene != CORNELL_BOX_BASIC) {
+            initCornellBoxBasic();
             initGL();
-            scene = _SPHERE;
+            scene = CORNELL_BOX_BASIC;
         }
     }
+
     if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-        if (scene != _SQUARE) {
-            initUnitSquare();
+        if (scene != CORNELL_BOX_POLYGON) {
+            initCornellBoxPolygon();
             initGL();
-            scene = _SQUARE;
-        }
-    }
-    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-        if (scene != _BOX) {
-            initCornellBox();
-            initGL();
-            scene = _BOX;
+            scene = CORNELL_BOX_POLYGON;
         }
     }
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
@@ -1013,17 +968,11 @@ int main(void) {
     glfwSwapInterval(1);
 
     switch (scene) {
-        case _SPHERE:
-            initUnitSphere();
-            break;
-        case _SQUARE:
-            initUnitSquare();
-            break;
-        case _BOX:
-            initCornellBox();
+        case CORNELL_BOX_BASIC:
+            initCornellBoxBasic();
             break;
         default:
-            initCornellBox();
+            initCornellBoxBasic();
     }
 
     initGL();
@@ -1060,11 +1009,7 @@ int main(void) {
         GLfloat aspect = GLfloat(width) / height;
 
         switch (scene) {
-            case _SPHERE:
-            case _SQUARE:
-                GLState::projection = Perspective(45.0, aspect, 0.01, 100.0);
-                break;
-            case _BOX:
+            case CORNELL_BOX_BASIC:
                 GLState::projection = Perspective(45.0, aspect, 4.5, 100.0);
                 break;
         }
