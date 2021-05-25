@@ -34,13 +34,14 @@ point4 cameraPosition;
 
 vector<point4> lightPoints;
 double lightSize = 0.5;
-int nbPoints = 1;
+int nbPoints = 10;
 
 //Recursion depth for raytracer
 int maxDepth = 5;
 
 void initGL();
-vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, float currentKr, bool debug);
+
+vec4 castRay(const vec4 &p0, const vec4 &dir, Object *lastHitObject, int depth, float currentKr, bool debug);
 
 namespace GLState {
     int window_width, window_height;
@@ -204,39 +205,50 @@ bool intersectionSort(Object::IntersectionValues i, Object::IntersectionValues j
     return (i.t < j.t);
 }
 
-color4 calculateAmbientColor(const Object::IntersectionValues& intersectionValue) {
+color4 calculateAmbientColor(const Object::IntersectionValues &intersectionValue) {
     Object::ShadingValues shVal = sceneObjects[intersectionValue.ID_]->shadingValues;
 
     // Ambient light intensity
-    color4 ambientMaterial = shVal.color * shVal.Ka; ambientMaterial.w = 1;
-    color4 ambient = GLState::light_ambient * ambientMaterial; ambient.w = 1;
+    color4 ambientMaterial = shVal.color * shVal.Ka;
+    ambientMaterial.w = 1;
+    color4 ambient = GLState::light_ambient * ambientMaterial;
+    ambient.w = 1;
 
     return ambient;
 }
 
-color4 calculateIllumination(const Object::IntersectionValues& intersectionValue, const vec4& dir) {
+color4 calculateIllumination(const Object::IntersectionValues &intersectionValue, const vec4 &dir) {
 
-    vec4 P = intersectionValue.P; P.w = 1;
-    vec4 N = normalize(intersectionValue.N); N.w = 0;
-    vec4 L = normalize(lightPosition - P); L.w = 0;
-    vec4 V = normalize(-dir); V.w = 0;
+    vec4 P = intersectionValue.P;
+    P.w = 1;
+    vec4 N = normalize(intersectionValue.N);
+    N.w = 0;
+    vec4 L = normalize(lightPosition - P);
+    L.w = 0;
+    vec4 V = normalize(-dir);
+    V.w = 0;
     vec4 R = normalize(-reflect(L, N));
 
     Object::ShadingValues shVal = sceneObjects[intersectionValue.ID_]->shadingValues;
 
     // Ambient light intensity
-    color4 ambientMaterial = shVal.color * shVal.Ka; ambientMaterial.w = 1;
-    color4 ambient = GLState::light_ambient * ambientMaterial; ambient.w = 1;
+    color4 ambientMaterial = shVal.color * shVal.Ka;
+    ambientMaterial.w = 1;
+    color4 ambient = GLState::light_ambient * ambientMaterial;
+    ambient.w = 1;
 
     // Diffuse light intensity
-    color4 diffuseMaterial = shVal.color * shVal.Kd; diffuseMaterial.w = 1;
+    color4 diffuseMaterial = shVal.color * shVal.Kd;
+    diffuseMaterial.w = 1;
     float diffuseFactor = max(dot(L, N), 0.0f);
-    color4 diffuse = GLState::light_diffuse * diffuseMaterial * diffuseFactor; diffuse.w = 1;
+    color4 diffuse = GLState::light_diffuse * diffuseMaterial * diffuseFactor;
+    diffuse.w = 1;
 
     // Specular light intensity
     vec4 specularMaterial = shVal.Ks;
     float specularFactor = pow(max(dot(V, R), 0.0f), shVal.Kn);
-    color4 specular = GLState::light_specular * specularMaterial * specularFactor; specular.w = 1; //  * shVal.color
+    color4 specular = GLState::light_specular * specularMaterial * specularFactor;
+    specular.w = 1; //  * shVal.color
 
     color4 final = ambient + diffuse + specular;
 
@@ -250,13 +262,18 @@ color4 calculateIllumination(const Object::IntersectionValues& intersectionValue
 // the ray arrived to the light source, then the light from the light source is blocked by an object
 // If the light is blocked return true, else return false
 float shadowFactorTransparency(const vec4 &point, const vec4 &lightPos = lightPosition) {
-    vec4 pointToLight = lightPos - point; pointToLight.w = 0;
+    vec4 pointToLight = lightPos - point;
+    pointToLight.w = 0;
 
-    vec4 pointToLightNormalized = normalize(pointToLight); pointToLightNormalized.w = 0;
-    vec4 epsilonPoint = point + EPSILON * pointToLightNormalized; epsilonPoint.w = 1;
+    vec4 pointToLightNormalized = normalize(pointToLight);
+    pointToLightNormalized.w = 0;
+    vec4 epsilonPoint = point + EPSILON * pointToLightNormalized;
+    epsilonPoint.w = 1;
 
-    vec4 epsilonPointToLight = lightPos - epsilonPoint; epsilonPointToLight.w = 0;
-    vec4 epsilonPointToLightNormalized = normalize(epsilonPointToLight); epsilonPointToLightNormalized.w = 0;
+    vec4 epsilonPointToLight = lightPos - epsilonPoint;
+    epsilonPointToLight.w = 0;
+    vec4 epsilonPointToLightNormalized = normalize(epsilonPointToLight);
+    epsilonPointToLightNormalized.w = 0;
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
     for (int i = 0; i < sceneObjects.size(); i++) {
@@ -271,7 +288,8 @@ float shadowFactorTransparency(const vec4 &point, const vec4 &lightPos = lightPo
         if (intersectionValues.t != std::numeric_limits<double>::infinity() && intersectionValues.t >= 0) {
             vec4 epsilonPointToP = intersectionValues.P - epsilonPoint;
             double lengthFromEpsilonPointToP = length(epsilonPointToP);
-            if (lengthFromEpsilonPointToP > 0 && lengthFromEpsilonPointToP < lengthFromEpsilonPointToLight) { // Point is in shadow
+            if (lengthFromEpsilonPointToP > 0 &&
+                lengthFromEpsilonPointToP < lengthFromEpsilonPointToLight) { // Point is in shadow
                 Object::ShadingValues shVal = sceneObjects[intersectionValues.ID_]->shadingValues;
                 coef *= 0.9f * shVal.Kt;
             }
@@ -313,7 +331,7 @@ float factorPointIsInShadow(const vec4 &point) {
     return total / lightPoints.size();
 }
 
-static color4 maxColor(const color4& color1, const color4& color2) {
+static color4 maxColor(const color4 &color1, const color4 &color2) {
     if (color1.x > color2.x) return color1;
     if (color1.x < color2.x) return color2;
     if (color1.y > color2.y) return color1;
@@ -325,33 +343,32 @@ static color4 maxColor(const color4& color1, const color4& color2) {
     return color1; // Same colors
 }
 
-static color4 interpolate(const color4& color1, const color4& color2, double factor) {
+static color4 interpolate(const color4 &color1, const color4 &color2, double factor) {
     if (maxColor(color1, color2) == color1)
         return color1;
 
     return (1 - factor) * color1 + factor * color2;
 }
 
-color4 getRefractedColor(const vec4& dir, const vec4& normal, const point4& newP0, const Object::ShadingValues& shVal,
-                         color4 objectColor, Object *lastHitObject, float currentKr, int depth, bool exitingObject, bool debug) {
+color4 getRefractedColor(const vec4 &dir, const vec4 &normal, const point4 &newP0, const Object::ShadingValues &shVal,
+                         color4 objectColor, Object *lastHitObject, float currentKr, int depth, bool exitingObject,
+                         bool debug) {
     float newKr = shVal.Kr;
     float transparency = shVal.Kt;
     vec4 refractedNormal = normal;
     if (dot(dir, normal) > 0)
         refractedNormal = -normal;
-//    cout << "dot 1 = " << dot(dir, normal) << endl;
-//    cout << "dot 2 = " << dot(dir, -normal) << endl;
     if (exitingObject) {
         newKr = 1.0f;
         transparency = 1;
-//        refractedNormal = -refractedNormal;
     }
 
     objectColor *= (1 - transparency);
 
     vec4 refractedRay = refract(dir, refractedNormal, currentKr, newKr);
     if (debug) {
-        cout << "Transparency = " << transparency << ", current coef. = " << currentKr << ", refraction coef. = " << newKr << endl;
+        cout << "Transparency = " << transparency << ", current coef. = " << currentKr << ", refraction coef. = "
+             << newKr << endl;
         cout << "Incident ray = " << dir << endl;
         cout << "Surface normal = " << refractedNormal << endl;
         cout << "Refracted ray = " << refractedRay << endl;
@@ -366,7 +383,7 @@ color4 getRefractedColor(const vec4& dir, const vec4& normal, const point4& newP
 /* ----------  cast Ray = p0 + t*dir and intersect with sphere      --------- */
 /* ----------  return color, right now shading is approx based      --------- */
 /* ----------  depth                                                --------- */
-vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, float currentKr, bool debug) {
+vec4 castRay(const vec4 &p0, const vec4 &dir, Object *lastHitObject, int depth, float currentKr, bool debug) {
     color4 color = vec4(0.0, 0.0, 0.0, 0.0);
 
     std::vector<Object::IntersectionValues> intersectionValuesVector;
@@ -414,28 +431,28 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
 
     if (depth == maxDepth) {
         color = objectColor;
-    }
-    else {
+    } else {
         point4 newP0 = iVal.P;
         vec4 normal = iVal.N;
 
         if (shVal.Ks == 0) { // Non-mirror object
             if (shVal.Kt == 0) { // Non-transparent AND non-transparent object
                 color = objectColor;
+            } else { // Non-mirror but transparent object
+                color = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth,
+                                          exitingObject, debug);
             }
-            else { // Non-mirror but transparent object
-                color = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth, exitingObject, debug);
-            }
-        }
-        else { // Mirror object
+        } else { // Mirror object
             if (shVal.Kt != 0) { // Mirror AND transparent object
-                objectColor = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth, exitingObject, debug);
+                objectColor = getRefractedColor(dir, normal, newP0, shVal, objectColor, lastHitObject, currentKr, depth,
+                                                exitingObject, debug);
             }
             objectColor *= (1 - shVal.Ks);
 
             vec4 reflectedRay = normalize(reflect(dir, iVal.N));
 
-            color4 reflectedObjetColor = shVal.Ks * castRay(newP0, reflectedRay, lastHitObject, depth + 1, currentKr, debug);
+            color4 reflectedObjetColor =
+                    shVal.Ks * castRay(newP0, reflectedRay, lastHitObject, depth + 1, currentKr, debug);
 
             color = objectColor + reflectedObjetColor;
         }
@@ -448,7 +465,7 @@ vec4 castRay(const vec4& p0, const vec4& dir, Object *lastHitObject, int depth, 
 /* -------------------------------------------------------------------------- */
 /* ---------  Some debugging code: cast Ray = p0 + t*dir  ------------------- */
 /* ---------  and print out what it hits =                ------------------- */
-void castRayDebug(const vec4& p0, const vec4& dir) {
+void castRayDebug(const vec4 &p0, const vec4 &dir) {
     cout << "### DEBUG START ###" << endl;
     castRay(p0, dir, nullptr, 0, 1.0f, true);
     cout << "# DEBUG END #" << endl << endl << endl << endl << endl << endl;
@@ -458,16 +475,15 @@ void castRayDebug(const vec4& p0, const vec4& dir) {
 /* ------------  Ray trace our scene.  Output color to image and    --------- */
 /* -----------   Output color to image and save to disk             --------- */
 void rayTrace() {
-    auto* chrono = new Chrono("Render time");
+    auto *chrono = new Chrono("Render time");
     cout << "Starting the rendering..." << endl;
-    Object::triangleTests = 0;
 
     auto *buffer = new unsigned char[GLState::window_width * GLState::window_height * 4];
     generateLightPoints();
 
-    auto* findRayChrono = new Chrono("findRay total time");
+    auto *findRayChrono = new Chrono("findRay total time");
     findRayChrono->pause();
-    auto* castRayChrono = new Chrono("castRay total time");
+    auto *castRayChrono = new Chrono("castRay total time");
     castRayChrono->pause();
 
     double currentPx = 0;
@@ -483,7 +499,8 @@ void rayTrace() {
             findRayChrono->pause();
 
             castRayChrono->unpause();
-            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0, 1.0f, false);
+            vec4 color = castRay(ray_o_dir[0], vec4(ray_o_dir[1].x, ray_o_dir[1].y, ray_o_dir[1].z, 0.0), nullptr, 0,
+                                 1.0f, false);
             castRayChrono->pause();
             buffer[4 * idx] = color.x * 255;
             buffer[4 * idx + 1] = color.y * 255;
@@ -502,12 +519,11 @@ void rayTrace() {
     findRayChrono->displayCurrentDuration();
     castRayChrono->displayCurrentDuration();
 
-    auto* writeChrono = new Chrono("Write image");
+    auto *writeChrono = new Chrono("Write image");
     write_image("output.png", buffer, GLState::window_width, GLState::window_height, 4);
     delete[] buffer;
     writeChrono->displayCurrentDuration();
 
-    cout << "Number of ray/triangle intersection done: " << Object::triangleTests << endl;
     cout << "Rendering ended." << endl;
     chrono->displayCurrentDuration();
 }
@@ -535,7 +551,8 @@ void initCornellBox() {
     float kr = 1.0; // Refraction coef. ALWAYS >= 1
 
     { // Light
-        sceneObjects.push_back(new Square("Light", RotateX(90) * Translate(0.0, 0.0, -1.99) * Scale(lightSize, lightSize, 1.0)));
+        sceneObjects.push_back(
+                new Square("Light", RotateX(90) * Translate(0.0, 0.0, -1.99) * Scale(lightSize, lightSize, 1.0)));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = lightColor;
         _shadingValues.Ka = ka + 0.0f;
@@ -648,7 +665,7 @@ void initCornellBoxBasic() {
     float kr = 1.0; // Refraction coef. ALWAYS >= 1
 
     {
-        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -1, -0.5),0.75));
+        sceneObjects.push_back(new Sphere("Mirrored sphere", vec3(-1.0, -1, -0.5), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 1.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
@@ -662,7 +679,7 @@ void initCornellBoxBasic() {
     }
 
     {
-        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5),0.75));
+        sceneObjects.push_back(new Sphere("Glass sphere", vec3(1.0, -1.25, 0.5), 0.75));
         Object::ShadingValues _shadingValues;
         _shadingValues.color = vec4(1.0, 0.0, 0.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
@@ -690,7 +707,7 @@ void initCornellBoxPolygon() {
 
     {
         const char *path = "Objects/sphere1.obj";
-        auto* meshObject1 = new MeshObject("Mesh mirrored sphere", path,
+        auto *meshObject1 = new MeshObject("Mesh mirrored sphere", path,
                                            Translate(-0.5, 0.5, -0.5) * Scale(0.8, 0.8, 0.8));
 
         sceneObjects.push_back(meshObject1);
@@ -708,7 +725,7 @@ void initCornellBoxPolygon() {
 
     {
         const char *path = "Objects/sphere1.obj";
-        auto* meshObject1 = new MeshObject("Mesh glass sphere", path,
+        auto *meshObject1 = new MeshObject("Mesh glass sphere", path,
                                            Translate(2.0, -0.5, 1.0) * Scale(1.1, 1.1, 1.1));
 
         sceneObjects.push_back(meshObject1);

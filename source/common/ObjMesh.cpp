@@ -148,12 +148,6 @@ bool Mesh::loadOBJ(const char * path){
     return true;
 }
 
-//bool Mesh::loadOBJ(const char *path, const vec3& objCenter, float objScale) {
-//    center = objCenter;
-//    scale = objScale;
-//    return loadOBJ(path);
-//}
-
 bool Mesh::makeSubdivisionSphere(int steps, vec3 center, double radius){
 
     box_min = center + radius*vec3(-1,-1,-1);
