@@ -118,6 +118,64 @@ Object::IntersectionValues MeshObject::intersect(vec4 p0, vec4 V) {
     return result;
 }
 
-void MeshObject::rayMeshObjectIntersection(const vec4& p0, const vec4& V, IntersectionValues *result) {
+void MeshObject::rayTriangleIntersection(const vec3& origin, const vec3& ray, const vec3& v0, const vec3& v1,
+                                         const vec3& v2, const vec3& n0, const vec3& n1, const vec3& n2,
+                                         IntersectionValues *result) {
+    const float epsilon = 0.0000001f;
+    vec3 edge1 = v1 - v0;
+    vec3 edge2 = v2 - v0;
 
+    vec3 h = cross(ray, edge2);
+    float a = dot(edge1, h);
+    if (a > -epsilon && a < epsilon) // Ray parallel to triangle
+        return;
+
+    float f = 1.0f / a;
+    vec3 s = origin - v0;
+    float u = f * dot(s, h);
+    if (u < 0 || u > 1)
+        return;
+
+    vec3 q = cross(s, edge1);
+    float v = f * dot(ray, q);
+    if (v < 0 || u + v > 1)
+        return;
+
+    // There is an intersection, calculate if it is in front of the camera
+    float t = f * dot(edge2, q);
+    if (t <= epsilon) // Behind
+        return;
+
+    // Intersection in front of the camera, change the results if it is the closest to the camera
+    if (t < result->t) {
+        result->t = t;
+        result->P = vec4(origin + (result->t * ray), 1);
+
+        vec3 N = normalize(cross(edge1, edge2));
+        if (dot(N, ray) > 0)
+            result->N = vec4(-N, 0);
+        else
+            result->N = vec4(N, 0);
+    }
+}
+
+void MeshObject::rayMeshObjectIntersection(const vec4& p0, const vec4& V, IntersectionValues *result) {
+    result->t = numeric_limits<double>::infinity();
+    vec3 origin = vec3(p0.x, p0.y, p0.z);
+    vec3 ray = vec3(V.x, V.y, V.z);
+
+    for (int index = 0; index < mesh.getNumTri(); index++) {
+        int i = index * 3;
+
+        vec3 v0 = vec3(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+        vec3 n0 = vec3(mesh.normals[i].x, mesh.normals[i].y, mesh.normals[i].z);
+
+        vec3 v1 = vec3(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
+        vec3 n1 = vec3(mesh.normals[i + 1].x, mesh.normals[i + 1].y, mesh.normals[i + 1].z);
+
+        vec3 v2 = vec3(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
+        vec3 n2 = vec3(mesh.normals[i + 2].x, mesh.normals[i + 2].y, mesh.normals[i + 2].z);
+
+        rayTriangleIntersection(origin, ray, v0, v1, v2, n0, n1, n2, result);
+    }
 }

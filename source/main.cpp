@@ -34,7 +34,7 @@ point4 cameraPosition;
 
 vector<point4> lightPoints;
 double lightSize = 0.5;
-int nbPoints = 50;
+int nbPoints = 1;
 
 //Recursion depth for raytracer
 int maxDepth = 5;
@@ -668,7 +668,7 @@ void initCornellBox() {
         _shadingValues.color = vec4(1.0, 0.0, 1.0, 1.0);
         _shadingValues.Ka = ka + 0.0f;
         _shadingValues.Kd = kd + 0.0f;
-        _shadingValues.Ks = ks + 1.0f;
+        _shadingValues.Ks = ks + 0.0f;
         _shadingValues.Kn = kn + 0.0f;
         _shadingValues.Kt = kt + 0.0f;
         _shadingValues.Kr = kr + 0.0f;

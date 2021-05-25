@@ -144,6 +144,10 @@ public:
 
 private:
     void rayMeshObjectIntersection(const vec4 &p0, const vec4 &V, IntersectionValues *result);
+
+    static void rayTriangleIntersection(const vec3& origin, const vec3& ray, const vec3& v0, const vec3& v1,
+                                        const vec3& v2, const vec3& n0, const vec3& n1, const vec3& n2,
+                                        IntersectionValues *result);
 };
 
 #endif /* defined(__OBJECT_H__) */
